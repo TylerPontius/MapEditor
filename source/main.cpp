@@ -6,7 +6,7 @@
 #include "Map.hpp"
 #include "TileMap.hpp"
 
-#define MAP_ED_VERSION "0.2"
+const std::string version = "0.2";
 
 
 
@@ -14,8 +14,8 @@ int main()
 {
     // create the window
     std::string windowTitle = "Map Editor ";
-    windowTitle.append( MAP_ED_VERSION );
-    sf::RenderWindow window( sf::VideoMode( WINDOW_W, WINDOW_H ), windowTitle );
+    windowTitle.append( version );
+    sf::RenderWindow window( sf::VideoMode( windowWidth, windowHeight ), windowTitle );
     //window.setFramerateLimit( 60 );
 
     tgui::Gui gui( window );
@@ -28,7 +28,7 @@ int main()
 
         // Load the widgets
         labelZPos->setText("Username:");
-        labelZPos->setPosition( 32, WINDOW_H - 48 );
+        labelZPos->setPosition( 32, windowHeight - 48 );
     }
     catch (const tgui::Exception& e)
     {
@@ -51,14 +51,15 @@ int main()
 
     // Load the tile selector
     sf::Texture tileTexture;
-    tileTexture.loadFromFile( TILESET_FILE );
-    sf::Sprite tileSprite;
-    tileSprite.setTexture( tileTexture );
+    tileTexture.loadFromFile( tilesetFile );
+
+    sf::Sprite tileSprite( tileTexture );
+
     sf::RenderWindow window2( sf::VideoMode( tileTexture.getSize().x, tileTexture.getSize().y ), "Tile Selector" );
-    window2.setPosition( sf::Vector2i( window.getPosition().x + WINDOW_W + 32, window.getPosition().y ) );
+    window2.setPosition( sf::Vector2i( window.getPosition().x + windowWidth + 32, window.getPosition().y ) );
 
     // Make the selection rectangle
-    sf::RectangleShape tileSelection( sf::Vector2f( TILE_SIZE, TILE_SIZE ) );
+    sf::RectangleShape tileSelection( sf::Vector2f( tileSize, tileSize ) );
     tileSelection.setFillColor( sf::Color::Transparent );
     tileSelection.setOutlineColor( sf::Color::Red );
     tileSelection.setOutlineThickness( 2.f );
@@ -66,19 +67,19 @@ int main()
     sf::Uint32 currentTile = 0;
 
     // Create the view
-    sf::View view( sf::Vector2f( WINDOW_W / 2, WINDOW_H / 2 ), sf::Vector2f( WINDOW_W, WINDOW_H ) );
+    sf::View view( sf::Vector2f( windowWidth / 2, windowHeight / 2 ), sf::Vector2f( windowWidth, windowHeight ) );
     window.setView( view );
 
     float zoomLevel = 1.f;
     view.zoom( zoomLevel );
 
     // Make the selection rectangle
-    sf::RectangleShape selection( sf::Vector2f( TILE_SIZE, TILE_SIZE ) );
+    sf::RectangleShape selection( sf::Vector2f( tileSize, tileSize ) );
     selection.setFillColor( sf::Color::Transparent );
     selection.setOutlineColor( sf::Color::Red );
     selection.setOutlineThickness( 3.f );
 
-    sf::RectangleShape selectionCell( sf::Vector2f( TILE_SIZE * CELL_WIDTH, TILE_SIZE * CELL_HEIGHT ) );
+    sf::RectangleShape selectionCell( sf::Vector2f( tileSize * cellWidth, tileSize * cellHeight ) );
     selectionCell.setFillColor( sf::Color::Transparent );
     selectionCell.setOutlineColor( sf::Color::Magenta );
     selectionCell.setOutlineThickness( 5.f );
@@ -86,7 +87,7 @@ int main()
     auto UpdateSelection = [] ( sf::RectangleShape* selection, sf::RectangleShape* selectionCell, sf::Vector3i position )
     {
         selection->setPosition( position.x, position.y );
-        selectionCell->setPosition( position.x - ( position.x % ( TILE_SIZE * CELL_WIDTH ) ), position.y - ( position.y % ( TILE_SIZE * CELL_HEIGHT ) ) );
+        selectionCell->setPosition( position.x - ( position.x % ( tileSize * cellWidth ) ), position.y - ( position.y % ( tileSize * cellHeight ) ) );
     };
 
 
@@ -108,16 +109,16 @@ int main()
                 position.y = worldPos.y;
 
                 // Snap to grid
-                position.x -= position.x % TILE_SIZE;
-                position.y -= position.y % TILE_SIZE;
+                position.x -= position.x % tileSize;
+                position.y -= position.y % tileSize;
             }
 
             // Z layer switching
             if( event.type == sf::Event::KeyPressed and event.key.code == sf::Keyboard::PageUp )
-                position.z += DRAW_LAYERS;
+                position.z += drawLayers;
 
             if( event.type == sf::Event::KeyPressed and event.key.code == sf::Keyboard::PageDown )
-                position.z -= DRAW_LAYERS;
+                position.z -= drawLayers;
 
             // Z layer switching
             if( event.type == sf::Event::KeyPressed and event.key.code == sf::Keyboard::Num1 )
@@ -162,7 +163,7 @@ int main()
                   event.key.code == sf::Keyboard::W    or
                   event.key.code == sf::Keyboard::S ) )
             {
-                sf::Int32 increment = TILE_SIZE * 2 * zoomLevel;
+                sf::Int32 increment = tileSize * 2 * zoomLevel;
                 sf::Vector2f pos;
                 pos.x = 0;
                 pos.y = 0;
@@ -179,17 +180,17 @@ int main()
                 view.move( pos );
 
                 // Make sure we don't move out of the world
-                if( view.getCenter().x - WINDOW_W / 2 < 0 )
-                    view.setCenter( WINDOW_W / 2, view.getCenter().y );
+                if( view.getCenter().x - windowWidth / 2 < 0 )
+                    view.setCenter( windowWidth / 2, view.getCenter().y );
 
-                if( view.getCenter().y - WINDOW_H / 2 < 0 )
-                    view.setCenter( view.getCenter().x, WINDOW_H / 2 );
+                if( view.getCenter().y - windowHeight / 2 < 0 )
+                    view.setCenter( view.getCenter().x, windowHeight / 2 );
 
-                if( view.getCenter().x + WINDOW_W / 2 > MAP_WIDTH * TILE_SIZE )
-                    view.setCenter( MAP_WIDTH * TILE_SIZE - WINDOW_W / 2, view.getCenter().y );
+                if( view.getCenter().x + windowWidth / 2 > mapWidth * tileSize )
+                    view.setCenter( mapWidth * tileSize - windowWidth / 2, view.getCenter().y );
 
-                if( view.getCenter().y + WINDOW_H / 2 > MAP_HEIGHT * TILE_SIZE )
-                    view.setCenter( view.getCenter().x, MAP_HEIGHT * TILE_SIZE - WINDOW_H / 2 );
+                if( view.getCenter().y + windowHeight / 2 > mapWidth * tileSize )
+                    view.setCenter( view.getCenter().x, mapWidth * tileSize - windowHeight / 2 );
 
                 sf::Vector3i viewPos;
                 viewPos.x = view.getCenter().x;
@@ -205,7 +206,7 @@ int main()
                   event.key.code == sf::Keyboard::Down    or
                   event.key.code == sf::Keyboard::Right ) )
             {
-                sf::Int32 increment = TILE_SIZE;
+                sf::Int32 increment = tileSize;
                 sf::Vector2f pos;
                 pos.x = 0;
                 pos.y = 0;
@@ -254,12 +255,12 @@ int main()
                 sf::Vector2f mousePos = window2.mapPixelToCoords( sf::Mouse::getPosition(window2) );
 
                 // Snap to grid
-                mousePos.x -= (int)mousePos.x % TILE_SIZE;
-                mousePos.y -= (int)mousePos.y % TILE_SIZE;
+                mousePos.x -= (int)mousePos.x % tileSize;
+                mousePos.y -= (int)mousePos.y % tileSize;
 
-                tileSelection.setPosition( mousePos ); std::cout << ((int)mousePos.x % TILE_SIZE ) << "  " << ((int)mousePos.y / TILE_SIZE ) << "  " << (tileTexture.getSize().x / TILE_SIZE ) << std::endl;
+                tileSelection.setPosition( mousePos ); std::cout << ((int)mousePos.x % tileSize ) << "  " << ((int)mousePos.y / tileSize ) << "  " << (tileTexture.getSize().x / tileSize ) << std::endl;
 
-                currentTile = ((int)mousePos.x / TILE_SIZE ) + ( ((int)mousePos.y / TILE_SIZE ) * (tileTexture.getSize().x / TILE_SIZE ) );
+                currentTile = ((int)mousePos.x / tileSize ) + ( ((int)mousePos.y / tileSize ) * (tileTexture.getSize().x / tileSize ) );
             }
 
             // "close requested" event: we close the window

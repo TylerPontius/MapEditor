@@ -8,31 +8,31 @@
 #include "Cell.hpp"
 
 // Map file name
-#define DB_NAME "map.db"
+const std::string mapFile = "map.db";
 
 // Tile size in pixels
-#define TILE_SIZE 48
+const sf::Uint32 tileSize = 48;
 
 // Tileset file
-#define TILESET_FILE "test.png"//"AOtexture.bmp"
+const std::string tilesetFile = "test.png"; //"AOtexture.bmp"
 
 // Cell size in tiles
-#define CELL_WIDTH 10
-#define CELL_HEIGHT 10
+const sf::Uint32 cellWidth = 10;
+const sf::Uint32 cellHeight = 10;
 
 // Map size in tiles
-#define MAP_WIDTH 1000
-#define MAP_HEIGHT 1000
+const sf::Uint32 mapWidth = 1000;
+const sf::Uint32 mapHeight = 1000;
 
 // Number of cells to buffer around screen
-#define MAP_BUFFER 4
+const sf::Uint32 mapBuffer = 4;
 
 // Window size in pixels
-#define WINDOW_H 768
-#define WINDOW_W 1024
+const sf::Uint32 windowHeight = 768;
+const sf::Uint32 windowWidth = 1024;
 
 // How many layers to draw
-#define DRAW_LAYERS 15
+const sf::Uint32 drawLayers = 15;
 
 extern bool saveChanges;
 

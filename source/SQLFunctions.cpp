@@ -1,10 +1,10 @@
 #include "SQLFunctions.hpp"
 #include "Map.hpp"
-
+/*
 SQLFunctions::SQLFunctions()
 {
     // start sqlite
-    std::string dbName = DB_NAME;
+    std::string dbName = dbName;
     if( sqlite3_open_v2( dbName.c_str(), &db, SQLITE_OPEN_READWRITE, NULL ) )
     {
         std::cout << "Failed to open db!" << sqlite3_extended_errcode( db ) << std::endl;
@@ -47,9 +47,10 @@ std::shared_ptr<Cell> SQLFunctions::LoadCell( sf::Uint32 id )
 
     sqlite3_finalize( statement );
 
-    std::shared_ptr<Cell> newCell( new Cell( id, ret[0], ret[1], ret[2], ret[3] ) );
+    sf::Vector3i pos;
 
-    return newCell;
+
+    return std::make_shared<Cell>( id, ret[0], ret[1], ret[2], ret[3] ) );
 };
 
 
@@ -168,3 +169,4 @@ SQLFunctions::~SQLFunctions()
 {
     sqlite3_close( db );
 };
+*/

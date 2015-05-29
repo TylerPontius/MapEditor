@@ -11,12 +11,7 @@ class Tile
         sf::Uint8 myAlpha;
 
     public:
-        Tile( sf::Vector3i position, sf::Uint32 tile, sf::Uint8 alpha )
-        {
-            SetPosition( position );
-            SetTile( tile );
-            SetAlpha( alpha );
-        };
+        Tile( sf::Vector3i position, sf::Uint32 tile, sf::Uint8 alpha );
         ~Tile() {};
 
         void SetPosition( sf::Vector3i position ) { myPosition = position; };

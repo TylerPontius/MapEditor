@@ -6,7 +6,7 @@ bool saveChanges = false;
 Map::Map()
 {
     // start sqlite
-    std::string dbName = DB_NAME;
+    std::string dbName = mapFile;
     if( sqlite3_open_v2( dbName.c_str(), &db, SQLITE_OPEN_READWRITE, NULL ) )
     {
         std::cout << "Failed to open db!" << sqlite3_extended_errcode( db ) << std::endl;
@@ -14,7 +14,7 @@ Map::Map()
 
     // Make the tiles
     sf::Image temp;
-    temp.loadFromFile( TILESET_FILE );
+    temp.loadFromFile( tilesetFile );
     temp.createMaskFromColor( temp.getPixel( temp.getSize().x-1, temp.getSize().y-1 ) );
 
     texture = new sf::Texture;
@@ -63,12 +63,12 @@ void Map::UpdateLoadedCells( sf::Vector3i position )
     // Which cells need to be loaded?
     // What cell is this in?
     sf::Vector3i centerCell;
-    centerCell.x = ( position.x / TILE_SIZE ) / CELL_WIDTH;
-    centerCell.y = ( position.y / TILE_SIZE ) / CELL_HEIGHT;
+    centerCell.x = ( position.x / tileSize ) / cellWidth;
+    centerCell.y = ( position.y / tileSize ) / cellHeight;
 
     // How many cells do we need loaded?
-    sf::Int32 horizCellsNeeded = ceil((float)WINDOW_W / ( CELL_WIDTH  * TILE_SIZE )) + MAP_BUFFER;
-    sf::Int32 vertiCellsNeeded = ceil((float)WINDOW_H / ( CELL_HEIGHT * TILE_SIZE )) + MAP_BUFFER;
+    sf::Int32 horizCellsNeeded = ceil((float)windowWidth / ( cellWidth  * tileSize )) + mapBuffer;
+    sf::Int32 vertiCellsNeeded = ceil((float)windowHeight / ( cellHeight * tileSize )) + mapBuffer;
 
     // Make sure the numbers are even to make things nice
     if( horizCellsNeeded % 2 != 0 ) horizCellsNeeded++;
@@ -83,16 +83,16 @@ void Map::UpdateLoadedCells( sf::Vector3i position )
 
     if( (centerCell.x - (horizCellsNeeded/2)) < 0  )
         currentCell.x = 0;
-    else if( centerCell.x + (horizCellsNeeded/2) > (MAP_WIDTH / CELL_WIDTH) )
-        currentCell.x = (MAP_WIDTH / CELL_WIDTH) - horizCellsNeeded;
+    else if( centerCell.x + (horizCellsNeeded/2) > (mapWidth / cellWidth) )
+        currentCell.x = (mapWidth / cellWidth) - horizCellsNeeded;
     else
         currentCell.x = centerCell.x - (horizCellsNeeded/2);
 
     // Check vertical bounds
     if( (centerCell.y - (vertiCellsNeeded/2)) < 0  )
         currentCell.y = 0;
-    else if( centerCell.y + (vertiCellsNeeded/2) > (MAP_HEIGHT / CELL_HEIGHT) )
-        currentCell.y = (MAP_HEIGHT / CELL_HEIGHT) - vertiCellsNeeded;
+    else if( centerCell.y + (vertiCellsNeeded/2) > (mapWidth / cellHeight) )
+        currentCell.y = (mapWidth / cellHeight) - vertiCellsNeeded;
     else
         currentCell.y = centerCell.y - (vertiCellsNeeded/2);
 
@@ -117,13 +117,13 @@ void Map::UpdateLoadedCells( sf::Vector3i position )
     // Now that we know which cells we need, load any that need to be
 
     // Loop through the rows
-    for( auto it = cellsNeeded.begin(); it != cellsNeeded.end(); ++it )
+    for( auto& it : cellsNeeded )
     {
         bool toLoad = true;
 
         // Is it already loaded?
-        for( auto it2 = myCells.begin(); it2 != myCells.end(); ++it2 )
-            if( it2->second->GetPosition() == *it )
+        for( auto& it2 : myCells )
+            if( it2.second->GetPosition() == it )
             {
                 toLoad = false;
                 break;
@@ -132,17 +132,17 @@ void Map::UpdateLoadedCells( sf::Vector3i position )
         // Cell not found in the map, load it!
         if( toLoad )
         {
-            sf::Uint32 cell = LoadCell( *it );
+            sf::Uint32 cell = LoadCell( it );
 
             // If it existed already, load its tile layer
             if( cell != 0 )
-                for( auto layer = *it; layer.z < (DRAW_LAYERS + (*it).z); layer.z++ )
+                for( auto layer = it; layer.z < (drawLayers + it.z); layer.z++ )
                     LoadCellTileLayer( cell, layer );
             // If it doesn't exist, make a new one!
             else
             {
                 maxCellID++;
-                CreateCell( *it, maxCellID );
+                CreateCell( it, maxCellID );
             }
         }
     }
@@ -331,7 +331,7 @@ void Map::LoadCellTileLayer( sf::Uint32 cell, sf::Vector3i position )
             sf::Uint32 tileID = sqlite3_column_int( statement, 2 );
 
             // Make sure the tile isn't outside cell bounds
-            if( tilePos.x >= 0 and tilePos.x < CELL_WIDTH and tilePos.y >= 0 and tilePos.y < CELL_HEIGHT )
+            if( tilePos.x >= 0 and tilePos.x < cellWidth and tilePos.y >= 0 and tilePos.y < cellHeight )
                 tiles.push_back( std::shared_ptr<Tile> ( new Tile( tilePos, tileID, 255 ) ) );
         }
     }
@@ -656,8 +656,8 @@ sf::Vector3i Map::ConvertToCellPosition( sf::Vector3i position )
     // Normalize the position
     position.z = 0;
 
-    position.x = ( position.x / TILE_SIZE ) / CELL_WIDTH;
-    position.y = ( position.y / TILE_SIZE ) / CELL_HEIGHT;
+    position.x = ( position.x / tileSize ) / cellWidth;
+    position.y = ( position.y / tileSize ) / cellHeight;
 
     return position;
 };
@@ -666,8 +666,8 @@ sf::Vector3i Map::ConvertToCellPosition( sf::Vector3i position )
 sf::Vector3i Map::ConvertToTilePosition( sf::Vector3i position )
 {
     // Normalize the position
-    position.x = ( position.x / TILE_SIZE ) % CELL_WIDTH;
-    position.y = ( position.y / TILE_SIZE ) % CELL_HEIGHT;
+    position.x = ( position.x / tileSize ) % cellWidth;
+    position.y = ( position.y / tileSize ) % cellHeight;
 
     return position;
 };

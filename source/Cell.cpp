@@ -41,13 +41,13 @@ void Cell::DrawCell( sf::RenderWindow* window, sf::Vector3i position )
     // Make sure we don't draw other layers
     // Exploit integer division to round to the nearest layer base
     if( position.z >= 0 )
-        position.z /= DRAW_LAYERS;
+        position.z /= drawLayers;
     else
     {
-        position.z -= DRAW_LAYERS-1;
-        position.z /= DRAW_LAYERS;
+        position.z -= drawLayers-1;
+        position.z /= drawLayers;
     }
-    position.z *= DRAW_LAYERS;
+    position.z *= drawLayers;
 
     if( myTileMaps.find( position.z ) != myTileMaps.end() )
         window->draw( myTileMaps[position.z] );
@@ -96,8 +96,8 @@ void Cell::SetBiome( sf::Vector3i position, sf::Uint32 tile )
     if( tile != 0 )
     {
         // Fill in with biome tile
-        for( int i = 0; i < CELL_WIDTH; i++ )
-            for( int j = 0; j < CELL_HEIGHT; j++ )
+        for( sf::Uint32 i = 0; i < cellWidth; i++ )
+            for( sf::Uint32 j = 0; j < cellHeight; j++ )
             {
                 std::shared_ptr<Tile> newTile( new Tile( sf::Vector3i( i, j, position.z ), tile, 255 ) );
                 myTiles[ position.z ].push_back( newTile );
@@ -121,6 +121,6 @@ void Cell::InitializeTileMap( sf::Vector3i position )
     // Add all tile textures
     myTileMaps[position.z].Load( myTexture );
     myTileMaps[position.z].setOrigin( 0.f, 0.f );
-    myTileMaps[position.z].setPosition( myPosition.x * TILE_SIZE * CELL_WIDTH, myPosition.y  * TILE_SIZE * CELL_HEIGHT );
+    myTileMaps[position.z].setPosition( myPosition.x * tileSize * cellWidth, myPosition.y  * tileSize * cellHeight );
 };
 
