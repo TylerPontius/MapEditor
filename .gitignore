@@ -43,12 +43,8 @@ Temporary Items
 .apdisk
 
 #Custom files for this project
-*.png
-*.jpg
 *.o
-*.conf
 *.dll
 *.exe
-*.ttf
-*.db
-*.bmp
+*.c
+*.h

@@ -17,8 +17,8 @@ const sf::Uint32 tileSize = 48;
 const std::string tilesetFile = "test.png"; //"AOtexture.bmp"
 
 // Cell size in tiles
-const sf::Uint32 cellWidth = 10;
-const sf::Uint32 cellHeight = 10;
+const sf::Uint32 cellWidth = 16;
+const sf::Uint32 cellHeight = 16;
 
 // Map size in tiles
 const sf::Uint32 mapWidth = 1000;
@@ -32,16 +32,20 @@ const sf::Uint32 windowHeight = 768;
 const sf::Uint32 windowWidth = 1024;
 
 // How many layers to draw
-const sf::Uint32 drawLayers = 15;
+const sf::Uint32 drawLayers = 16;
 
+// Should map changes be saved?
 extern bool saveChanges;
 
+// Map class manages the entire world map
+// Any external program functions will interact with this.
 
 class Map
 {
 public:
     Map();
     ~Map();
+
     void SetCellTile( sf::Vector3i position, sf::Uint32 tile );
     void SetCellBiome( sf::Vector3i position, sf::Uint32 tile );
 

@@ -5,7 +5,7 @@ bool saveChanges = false;
 
 Map::Map()
 {
-    // start sqlite
+    // Start sqlite
     std::string dbName = mapFile;
     if( sqlite3_open_v2( dbName.c_str(), &db, SQLITE_OPEN_READWRITE, NULL ) )
     {
@@ -61,14 +61,18 @@ void Map::SetCellBiome( sf::Vector3i position, sf::Uint32 tile )
 void Map::UpdateLoadedCells( sf::Vector3i position )
 {
     // Which cells need to be loaded?
-    // What cell is this in?
+
+    // First, find what cell we are in
+    // This lets us work the rest of the math in terms
+    // of cell IDs
     sf::Vector3i centerCell;
     centerCell.x = ( position.x / tileSize ) / cellWidth;
     centerCell.y = ( position.y / tileSize ) / cellHeight;
 
     // How many cells do we need loaded?
-    sf::Int32 horizCellsNeeded = ceil((float)windowWidth / ( cellWidth  * tileSize )) + mapBuffer;
-    sf::Int32 vertiCellsNeeded = ceil((float)windowHeight / ( cellHeight * tileSize )) + mapBuffer;
+    // This is equal to the number of cells visible plus a buffer
+    sf::Uint32 horizCellsNeeded = ceil( windowWidth  / ( cellWidth  * tileSize )) + mapBuffer;
+    sf::Uint32 vertiCellsNeeded = ceil( windowHeight / ( cellHeight * tileSize )) + mapBuffer;
 
     // Make sure the numbers are even to make things nice
     if( horizCellsNeeded % 2 != 0 ) horizCellsNeeded++;
@@ -77,10 +81,10 @@ void Map::UpdateLoadedCells( sf::Vector3i position )
     // What's the upper left cell ID?
     // To calculate, find the cell positions of the upper and left cells needed
 
-    // Check horizontal bounds
     sf::Vector3i currentCell;
-    currentCell.z = 0;
+    currentCell.z = position.z;
 
+    // Check horizontal bounds
     if( (centerCell.x - (horizCellsNeeded/2)) < 0  )
         currentCell.x = 0;
     else if( centerCell.x + (horizCellsNeeded/2) > (mapWidth / cellWidth) )
@@ -97,13 +101,16 @@ void Map::UpdateLoadedCells( sf::Vector3i position )
         currentCell.y = centerCell.y - (vertiCellsNeeded/2);
 
     // Make a list of all the cell IDs we need to load
+    // Now that currentCell is set to the upper left cell of the screen,
+    // we can populate the list in typewriter fashion:
+
     std::vector< sf::Vector3i > cellsNeeded;
 
     // Loop through the rows
-    for( sf::Int32 i = 0; i < vertiCellsNeeded; i++ )
+    for( sf::Uint32 i = 0; i < vertiCellsNeeded; i++ )
     {
         // Loop through the columns
-        for( sf::Int32 j = 0; j < horizCellsNeeded; j++ )
+        for( sf::Uint32 j = 0; j < horizCellsNeeded; j++ )
         {
             cellsNeeded.push_back( currentCell );
             currentCell.x++;
@@ -114,7 +121,7 @@ void Map::UpdateLoadedCells( sf::Vector3i position )
         currentCell.y++;
     }
 
-    // Now that we know which cells we need, load any that need to be
+    // Now that we know which cells we need, load any we need
 
     // Loop through the rows
     for( auto& it : cellsNeeded )
@@ -147,26 +154,27 @@ void Map::UpdateLoadedCells( sf::Vector3i position )
         }
     }
 
+    // Clean up any unused cells
     // If it's already loaded, do we still need it?
     std::vector< sf::Uint32 > toRemove;
-    for( auto it = myCells.begin(); it != myCells.end(); ++it )
+    for( auto& it : myCells )
     {
         bool isNeeded = false;
 
-        for( auto it2 = cellsNeeded.begin(); it2 != cellsNeeded.end(); ++it2 )
-            if( it->second->GetPosition() == *it2 )
+        for( auto& it2 : cellsNeeded )
+            if( it.second->GetPosition() == it2 )
                 isNeeded = true;
 
         if( !isNeeded )
-            toRemove.push_back( it->first );
+            toRemove.push_back( it.first );
     }
 
 
     // Remove the old cells
-    for( auto it = toRemove.begin(); it != toRemove.end(); ++it )
+    for( auto& it : toRemove )
     {
-        SaveCell( *it );
-        myCells.erase( *it );
+        SaveCell( it );
+        myCells.erase( it );
     }
 };
 
@@ -634,8 +642,8 @@ void Map::SaveCell( sf::Uint32 cell )
 
 void Map::DrawMap( sf::RenderWindow* window, sf::Vector3i position )
 {
-    for( auto it = myCells.begin(); it != myCells.end(); ++it )
-        it->second->DrawCell( window, position );
+    for( auto& it : myCells )
+        it.second->DrawCell( window, position );
 };
 
 sf::Uint32 Map::GetCell( sf::Vector3i position )

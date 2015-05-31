@@ -12,11 +12,11 @@ const std::string version = "0.2";
 
 int main()
 {
-    // create the window
+    // Create the window
     std::string windowTitle = "Map Editor ";
     windowTitle.append( version );
     sf::RenderWindow window( sf::VideoMode( windowWidth, windowHeight ), windowTitle );
-    //window.setFramerateLimit( 60 );
+    window.setFramerateLimit( 60 );
 
     tgui::Gui gui( window );
     auto labelZPos = tgui::Label::create( "widgets/Black.conf" );
@@ -27,8 +27,10 @@ int main()
         gui.setGlobalFont( "fonts/DejaVuSans.ttf" );
 
         // Load the widgets
-        labelZPos->setText("Username:");
         labelZPos->setPosition( 32, windowHeight - 48 );
+        labelZPos->setTextColor( sf::Color::White );
+        labelZPos->setTextSize( 18 );
+        gui.add( labelZPos );
     }
     catch (const tgui::Exception& e)
     {
@@ -77,33 +79,37 @@ int main()
     sf::RectangleShape selection( sf::Vector2f( tileSize, tileSize ) );
     selection.setFillColor( sf::Color::Transparent );
     selection.setOutlineColor( sf::Color::Red );
-    selection.setOutlineThickness( 3.f );
+    selection.setOutlineThickness( 2.5 );
 
+    // Make the cell selector rectangle
     sf::RectangleShape selectionCell( sf::Vector2f( tileSize * cellWidth, tileSize * cellHeight ) );
     selectionCell.setFillColor( sf::Color::Transparent );
     selectionCell.setOutlineColor( sf::Color::Magenta );
     selectionCell.setOutlineThickness( 5.f );
 
-    auto UpdateSelection = [] ( sf::RectangleShape* selection, sf::RectangleShape* selectionCell, sf::Vector3i position )
+    // Create a lambda function for updating the rectangles
+    auto UpdateSelection = [] ( sf::RectangleShape& selection, sf::RectangleShape& selectionCell, sf::Vector3i& position )
     {
-        selection->setPosition( position.x, position.y );
-        selectionCell->setPosition( position.x - ( position.x % ( tileSize * cellWidth ) ), position.y - ( position.y % ( tileSize * cellHeight ) ) );
+        selection.setPosition( position.x, position.y );
+        selectionCell.setPosition( position.x - ( position.x % ( tileSize * cellWidth ) ), position.y - ( position.y % ( tileSize * cellHeight ) ) );
     };
 
 
-    // run the program as long as the window is open
-    sf::Clock clock; int fps = 0;
+    // Run the program as long as the window is open
+    sf::Clock clock;
+    int fps = 0;
+
     while( window.isOpen() )
     {
-        // check all the window's events that were triggered since the last iteration of the loop
+        // Check all the window's events that were triggered since the last iteration of the loop
         sf::Event event;
         while( window.pollEvent(event) )
         {
-            // mouse moved
+            // Mouse moved
             if( event.type == sf::Event::MouseButtonPressed )
             {
-                // get the current mouse position in world coords
-                sf::Vector2f worldPos = window.mapPixelToCoords( sf::Mouse::getPosition(window) );
+                // Get the current mouse position in world coords
+                sf::Vector2f worldPos( window.mapPixelToCoords( sf::Mouse::getPosition(window) ) );
 
                 position.x = worldPos.x;
                 position.y = worldPos.y;
@@ -113,40 +119,112 @@ int main()
                 position.y -= position.y % tileSize;
             }
 
-            // Z layer switching
-            if( event.type == sf::Event::KeyPressed and event.key.code == sf::Keyboard::PageUp )
-                position.z += drawLayers;
+            if( event.type == sf::Event::KeyPressed )
+            {
+                // Z layer switching between levels
+                if( event.key.code == sf::Keyboard::PageUp )
+                    position.z += drawLayers;
 
-            if( event.type == sf::Event::KeyPressed and event.key.code == sf::Keyboard::PageDown )
-                position.z -= drawLayers;
+                if( event.key.code == sf::Keyboard::PageDown )
+                    position.z -= drawLayers;
 
-            // Z layer switching
-            if( event.type == sf::Event::KeyPressed and event.key.code == sf::Keyboard::Num1 )
-                position.z += 1;
+                // Z layer switching within levels
+                if( event.key.code == sf::Keyboard::Key::Add )
+                    position.z += 1;
 
-            if( event.type == sf::Event::KeyPressed and event.key.code == sf::Keyboard::Num2 )
-                position.z -= 1;
+                if( event.key.code == sf::Keyboard::Key::Subtract )
+                    position.z -= 1;
 
-            if( event.type == sf::Event::KeyPressed and event.key.code == sf::Keyboard::B )
-                worldMap.SetCellBiome( position, currentTile );
+                // Set the selected cell's biome
+                if( event.key.code == sf::Keyboard::B )
+                    worldMap.SetCellBiome( position, currentTile );
 
-            if( event.type == sf::Event::KeyPressed and event.key.code == sf::Keyboard::E )
-                worldMap.SetCellTile( position, currentTile );
+                // Set the selected tile
+                if( event.key.code == sf::Keyboard::E )
+                    worldMap.SetCellTile( position, currentTile );
 
-            if( event.type == sf::Event::KeyPressed and event.key.code == sf::Keyboard::C )
-                worldMap.SetCellBiome( position, 0 );
+                // Clear the cell
+                if( event.key.code == sf::Keyboard::C )
+                    worldMap.SetCellBiome( position, 0 );
 
-            if( event.type == sf::Event::KeyPressed and event.key.code == sf::Keyboard::Z )
-                saveChanges = !saveChanges;
+                // Toggle saving
+                if( event.key.code == sf::Keyboard::Z )
+                    saveChanges = !saveChanges;
 
-            // Scrollwheel moved
+                // If a movement button changed state
+                if( event.key.code == sf::Keyboard::A  or
+                    event.key.code == sf::Keyboard::D or
+                    event.key.code == sf::Keyboard::W    or
+                    event.key.code == sf::Keyboard::S )
+                {
+                    // How much should we move?
+                    sf::Int32 increment = tileSize * 2 * zoomLevel;
+
+                    // Vector to store delta move
+                    sf::Vector2f offset( 0, 0 );
+
+                    switch( event.key.code )
+                    {
+                        case sf::Keyboard::A: offset.x -= increment; break;
+                        case sf::Keyboard::D: offset.x += increment; break;
+                        case sf::Keyboard::W: offset.y -= increment; break;
+                        case sf::Keyboard::S: offset.y += increment; break;
+                        default: break;
+                    }
+
+                    view.move( offset );
+
+                    // Make sure we don't move out of the world
+                    if( view.getCenter().x - windowWidth / 2 < 0 )
+                        view.setCenter( windowWidth / 2, view.getCenter().y );
+
+                    if( view.getCenter().y - windowHeight / 2 < 0 )
+                        view.setCenter( view.getCenter().x, windowHeight / 2 );
+
+                    if( view.getCenter().x + windowWidth / 2 > mapWidth * tileSize )
+                        view.setCenter( mapWidth * tileSize - windowWidth / 2, view.getCenter().y );
+
+                    if( view.getCenter().y + windowHeight / 2 > mapWidth * tileSize )
+                        view.setCenter( view.getCenter().x, mapWidth * tileSize - windowHeight / 2 );
+
+                    sf::Vector3i viewPos;
+                    viewPos.x = view.getCenter().x;
+                    viewPos.y = view.getCenter().y;
+
+                    worldMap.UpdateLoadedCells( viewPos );
+                }
+
+                // If a movement button changed state
+                if(   event.type == sf::Event::EventType::KeyPressed and
+                     (event.key.code == sf::Keyboard::Up  or
+                      event.key.code == sf::Keyboard::Left or
+                      event.key.code == sf::Keyboard::Down    or
+                      event.key.code == sf::Keyboard::Right ) )
+                {
+                    sf::Int32 increment = tileSize;
+                    sf::Vector2f offset( 0, 0 );
+
+                    switch( event.key.code )
+                    {
+                        case sf::Keyboard::Left:  offset.x -= increment; break;
+                        case sf::Keyboard::Right: offset.x += increment; break;
+                        case sf::Keyboard::Up:    offset.y -= increment; break;
+                        case sf::Keyboard::Down:  offset.y += increment; break;
+                        default: break;
+                    }
+
+                    position.x += offset.x;
+                    position.y += offset.y;
+                }
+            }
+
+            // Scrollwheel moved - adjust zoom
             if( event.type == sf::Event::MouseWheelMoved )
             {
                 float zoomFactor = 1.f;
 
                 if( event.mouseWheel.delta == -1 and zoomLevel < 16.f )
                     zoomFactor = 2;
-
 
                 if( event.mouseWheel.delta == 1 and zoomLevel > 1.f )
                     zoomFactor = 0.5;
@@ -156,79 +234,13 @@ int main()
                 view.zoom( zoomFactor );
             }
 
-            // If a movement button changed state
-            if(   event.type == sf::Event::EventType::KeyPressed and
-                 (event.key.code == sf::Keyboard::A  or
-                  event.key.code == sf::Keyboard::D or
-                  event.key.code == sf::Keyboard::W    or
-                  event.key.code == sf::Keyboard::S ) )
-            {
-                sf::Int32 increment = tileSize * 2 * zoomLevel;
-                sf::Vector2f pos;
-                pos.x = 0;
-                pos.y = 0;
-
-                switch( event.key.code )
-                {
-                    case sf::Keyboard::A: pos.x -= increment; break;
-                    case sf::Keyboard::D: pos.x += increment; break;
-                    case sf::Keyboard::W: pos.y -= increment; break;
-                    case sf::Keyboard::S: pos.y += increment; break;
-                    default: break;
-                }
-
-                view.move( pos );
-
-                // Make sure we don't move out of the world
-                if( view.getCenter().x - windowWidth / 2 < 0 )
-                    view.setCenter( windowWidth / 2, view.getCenter().y );
-
-                if( view.getCenter().y - windowHeight / 2 < 0 )
-                    view.setCenter( view.getCenter().x, windowHeight / 2 );
-
-                if( view.getCenter().x + windowWidth / 2 > mapWidth * tileSize )
-                    view.setCenter( mapWidth * tileSize - windowWidth / 2, view.getCenter().y );
-
-                if( view.getCenter().y + windowHeight / 2 > mapWidth * tileSize )
-                    view.setCenter( view.getCenter().x, mapWidth * tileSize - windowHeight / 2 );
-
-                sf::Vector3i viewPos;
-                viewPos.x = view.getCenter().x;
-                viewPos.y = view.getCenter().y;
-
-                worldMap.UpdateLoadedCells( viewPos );
-            }
-
-            // If a movement button changed state
-            if(   event.type == sf::Event::EventType::KeyPressed and
-                 (event.key.code == sf::Keyboard::Up  or
-                  event.key.code == sf::Keyboard::Left or
-                  event.key.code == sf::Keyboard::Down    or
-                  event.key.code == sf::Keyboard::Right ) )
-            {
-                sf::Int32 increment = tileSize;
-                sf::Vector2f pos;
-                pos.x = 0;
-                pos.y = 0;
-
-                switch( event.key.code )
-                {
-                    case sf::Keyboard::Left:  pos.x -= increment; break;
-                    case sf::Keyboard::Right: pos.x += increment; break;
-                    case sf::Keyboard::Up:    pos.y -= increment; break;
-                    case sf::Keyboard::Down:  pos.y += increment; break;
-                    default: break;
-                }
-
-                position.x += pos.x;
-                position.y += pos.y;
-            }
 
 
-            // catch the resize events
+
+            // Catch the resize events
             if( event.type == sf::Event::Resized )
             {
-                // update the view to the new size of the window
+                // Update the view to the new size of the window
                 sf::Vector2f visibleArea( event.size.width, event.size.height );
                 view.setSize( visibleArea );
             }
@@ -241,25 +253,26 @@ int main()
             gui.handleEvent(event);
 
             // Update our selection rectangles
-            UpdateSelection( &selection, &selectionCell, position );
+            UpdateSelection( selection, selectionCell, position );
         }
 
 
         // Process the tile selection window
         while( window2.pollEvent(event) )
         {
-            // mouse moved
+            // Mouse click
             if( event.type == sf::Event::MouseButtonPressed )
             {
-                // get the current mouse position in world coords
-                sf::Vector2f mousePos = window2.mapPixelToCoords( sf::Mouse::getPosition(window2) );
+                // Get the current mouse position in world coords
+                sf::Vector2f mousePos( window2.mapPixelToCoords( sf::Mouse::getPosition(window2) ) );
 
                 // Snap to grid
                 mousePos.x -= (int)mousePos.x % tileSize;
                 mousePos.y -= (int)mousePos.y % tileSize;
 
-                tileSelection.setPosition( mousePos ); std::cout << ((int)mousePos.x % tileSize ) << "  " << ((int)mousePos.y / tileSize ) << "  " << (tileTexture.getSize().x / tileSize ) << std::endl;
+                tileSelection.setPosition( mousePos );
 
+                // Calculate the tile ID
                 currentTile = ((int)mousePos.x / tileSize ) + ( ((int)mousePos.y / tileSize ) * (tileTexture.getSize().x / tileSize ) );
             }
 
@@ -268,6 +281,7 @@ int main()
                 window.close();
         }
 
+        // Set the label text
         {
             std::stringstream ss;
             if( saveChanges ) ss << "Saving on, ";
