@@ -19,12 +19,15 @@ void Layer::SetBiome( sf::Uint32 biome )
 }
 
 // Add a tile to the layer
-void Layer::AddTile( std::shared_ptr<Tile> tile )
+void Layer::AddTile( sf::Vector3i position, sf::Uint32 tile )
 {
+    // First, remove a tile if one already occupies the same position
+    RemoveTile( position );
 
-    myTiles.push_back( tile );
-    sf::Uint32 tileNumber = tile->myTileID;
-    sf::Uint32 x = tile->myPosition.x - myPosition.x, y = tile->myPosition.y - myPosition.y;
+    myTiles.emplace_back( position, tile, 255 );
+    auto& newTile = myTiles.back();
+    sf::Uint32 tileNumber = newTile.myTileID;
+    sf::Uint32 x = newTile->myPosition.x - myPosition.x, y = newTile->myPosition.y - myPosition.y;
 
     // find its position in the tileset texture
     int tu = tileNumber % (myTileset->getSize().x / tileSize );
@@ -51,7 +54,7 @@ void Layer::RemoveTile( sf::Vector3i position )
 {
     // Remove the tile from our list
     std::remove_if( myTiles.begin(), myTiles.end(),
-                    [&] ( std::shared_ptr<Tile> tile ) { return (tile->myPosition == position); } );
+                    [&] ( std::unique_ptr<Tile> tile ) { return (tile->myPosition == position); } );
 
     // Find the relative position
     sf::Uint32 x = position.x - myPosition.x, y = position.y - myPosition.y;

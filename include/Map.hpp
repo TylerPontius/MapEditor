@@ -40,21 +40,22 @@ extern bool saveChanges;
 // Map class manages the entire world map
 // Any external program functions will interact with this.
 
-class Map
+class Map : public sf::Drawable
 {
 public:
     Map();
     ~Map();
 
-    void SetCellTile( sf::Vector3i position, sf::Uint32 tile );
-    void SetCellBiome( sf::Vector3i position, sf::Uint32 tile );
+    void SetTile( sf::Vector3i position, sf::Uint32 tile );
+    void SetBiome( sf::Vector3i position, sf::Uint32 tile );
 
     void UpdateLoadedCells( sf::Vector3i position );
-    void DrawMap( sf::RenderWindow* window, sf::Vector3i position );
-
-    sf::Texture* GetTexture() { return texture; };
 
  private:
+    virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+
+
+
     void CreateCell( sf::Vector3i position, sf::Uint32 cell );
     sf::Uint32 LoadCell( sf::Vector3i position );
 
@@ -67,7 +68,7 @@ public:
     sf::Vector3i ConvertToTilePosition( sf::Vector3i position );
 
     sqlite3* db;
-    std::map< sf::Uint32, std::shared_ptr<Cell> > myCells;
+    std::map< sf::Uint32, std::unique_ptr<Cell> > myCells;
     sf::Texture* texture;
     sf::Uint32 maxCellID;
 };

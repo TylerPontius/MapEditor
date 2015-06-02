@@ -42,15 +42,15 @@ Map::Map()
         std::cout << "Error grabbing max cell ID." << std::endl;
 };
 
-// Set a particular tile in a cell
-void Map::SetCellTile( sf::Vector3i position, sf::Uint32 tile )
+// Set a particular tile
+void Map::SetTile( sf::Vector3i position, sf::Uint32 tile )
 {
     // Make sure it exists!
     if( GetCell( position ) != 0 )
         myCells[ GetCell( position ) ]->SetTile( ConvertToTilePosition( position ), tile );
 };
 
-void Map::SetCellBiome( sf::Vector3i position, sf::Uint32 tile )
+void Map::SetBiome( sf::Vector3i position, sf::Uint32 tile )
 {
     // Make sure it exists!
     if( GetCell( position ) != 0 )

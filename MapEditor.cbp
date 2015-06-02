@@ -46,15 +46,14 @@
 			<Add directory="../TGUI-0.7-dev/bin/lib" />
 		</Linker>
 		<Unit filename="include/Cell.hpp" />
+		<Unit filename="include/Layer.hpp" />
 		<Unit filename="include/Map.hpp" />
 		<Unit filename="include/SQLFunctions.hpp" />
 		<Unit filename="include/Tile.hpp" />
-		<Unit filename="include/TileMap.hpp" />
 		<Unit filename="source/Cell.cpp" />
+		<Unit filename="source/Layer.cpp" />
 		<Unit filename="source/Map.cpp" />
 		<Unit filename="source/SQLFunctions.cpp" />
-		<Unit filename="source/Tile.cpp" />
-		<Unit filename="source/TileMap.cpp" />
 		<Unit filename="source/main.cpp" />
 		<Unit filename="source/sqlite3.c">
 			<Option compilerVar="CC" />

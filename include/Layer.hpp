@@ -14,7 +14,7 @@ public:
     Layer( sf::Texture* tileset, sf::Vector3i position );
 
     void SetBiome( sf::Uint32 biome );
-    void AddTile( std::shared_ptr<Tile> tile );
+    void AddTile( sf::Vector3i position, sf::Uint32 tile );
     void RemoveTile( sf::Vector3i position );
     void Clear();
 
@@ -23,7 +23,7 @@ private:
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
     sf::VertexArray myVertices;
-    std::vector< std::shared_ptr<Tile> > myTiles;
+    std::vector< std::unique_ptr<Tile> > myTiles;
 
     sf::Texture* myTileset;
     sf::Vector3i myPosition;
