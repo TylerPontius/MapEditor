@@ -275,14 +275,13 @@ sf::Uint32 Map::LoadCell( sf::Vector3i position )
     sqlite3_finalize( statement );
 
     CreateCell( position, cellID );
-    myCells[cellID]->SetProperties( biomes, areas );
 
     return cellID;
 };
 
 void Map::CreateCell( sf::Vector3i position, sf::Uint32 cell )
 {
-    myCells.insert( std::pair< sf::Uint32, std::shared_ptr<Cell> > ( cell, std::shared_ptr<Cell>(new Cell( cell, position, texture )) ) );
+    //myCells.insert( std::pair< sf::Uint32, std::shared_ptr<Cell> > ( cell, std::shared_ptr<Cell>(new Cell( cell, position, texture )) ) );
 };
 
 
@@ -344,7 +343,7 @@ void Map::LoadCellTileLayer( sf::Uint32 cell, sf::Vector3i position )
         }
     }
 
-    myCells[cell]->InitTileLayer( tiles, position );
+    //myCells[cell]->InitTileLayer( tiles, position );
 
     sqlite3_finalize( statement );
 
@@ -483,7 +482,7 @@ void Map::SaveCell( sf::Uint32 cell )
     }
 
     // Now, save all biomes
-    {
+    {/*
         // Download the info from the cell
         auto biomes = myCells[ cell ]->GetBiomes();
         auto areas  = myCells[ cell ]->GetAreas ();
@@ -551,7 +550,7 @@ void Map::SaveCell( sf::Uint32 cell )
 
                 sqlite3_finalize( statement );
             }
-        }
+        }*/
     }
 
     // Now, save all tiles

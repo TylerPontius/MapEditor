@@ -4,7 +4,6 @@
 #include <sstream>
 
 #include "Map.hpp"
-#include "TileMap.hpp"
 
 const std::string version = "0.2";
 
@@ -16,7 +15,7 @@ int main()
     std::string windowTitle = "Map Editor ";
     windowTitle.append( version );
     sf::RenderWindow window( sf::VideoMode( windowWidth, windowHeight ), windowTitle );
-    window.setFramerateLimit( 60 );
+    //window.setFramerateLimit( 60 );
 
     tgui::Gui gui( window );
     auto labelZPos = tgui::Label::create( "widgets/Black.conf" );

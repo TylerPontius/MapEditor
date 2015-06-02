@@ -3,27 +3,28 @@
 
 #include <memory>
 #include <map>
-#include "Tile.hpp"
-#include "TileMap.hpp"
+#include "Layer.hpp"
 
-class Cell
+// A cell is a portion of the map.
+// A map is made of cells, as they reduce rendering intensity
+// and make it easier to manage the world.
+
+// A cell contains all layers from bottom to top
+
+class Cell : public sf::Drawable
 {
+
 public:
-    Cell( sf::Uint32 id, sf::Vector3i position, sf::Texture* texture );
+    Cell( sf::Uint32 id, sf::Vector3i position ) : myID( id ), myPosition( position ) {};
     ~Cell() {};
 
-    void InitTileLayer( std::vector< std::shared_ptr<Tile> > tiles, sf::Vector3i position );
-    void SetProperties( std::map< sf::Int32, sf::Uint32 > biomes, std::map< sf::Int32, sf::Uint32 > areas );
-    void DrawCell( sf::RenderWindow* window, sf::Vector3i position );
+    virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
     void SetTile( sf::Vector3i position, sf::Uint32 tile );
     void SetBiome( sf::Vector3i position, sf::Uint32 tile );
 
+    std::shared_ptr<Tile> GetTile( sf::Vector3i position );
     sf::Uint32 GetBiome( sf::Vector3i position );
-
-    std::map< sf::Int32, sf::Uint32 > GetBiomes() { return myBiomes; };
-    std::map< sf::Int32, sf::Uint32 > GetAreas() { return myAreas; };
-    std::map< sf::Int32, std::vector< std::shared_ptr<Tile> > > GetTiles() { return myTiles; };
 
     sf::Uint32 GetID() { return myID; };
     sf::Vector3i GetPosition() { return myPosition; };
@@ -31,14 +32,11 @@ public:
 private:
     sf::Uint32 myID;
     sf::Vector3i myPosition;
-    sf::Texture* myTexture;
 
-    void InitializeTileMap( sf::Vector3i position );
-
-    // Map Z layer with properties
-    std::map< sf::Int32, std::vector< std::shared_ptr<Tile> > > myTiles;
-    std::map< sf::Int32, sf::Uint32 > myBiomes, myAreas;
-    std::map< sf::Int32, TileMap > myTileMaps;
+    // Map of all Z layers
+    // The first half represents Z level,
+    // the second half represents data about that layer
+    std::map< sf::Int32, std::unique_ptr<Layer> > myLayers;
 };
 
 #endif

@@ -5,23 +5,13 @@
 
 class Tile
 {
-    protected:
-        sf::Vector3i myPosition;
-        sf::Uint32 myTile;
-        sf::Uint8 myAlpha;
-
     public:
-        Tile( sf::Vector3i position, sf::Uint32 tile, sf::Uint8 alpha );
+        Tile( sf::Vector3i position, sf::Uint32 tileID, sf::Uint8 alpha ) : myPosition( position ), myTileID( tileID ), myAlpha( alpha ) {};
         ~Tile() {};
 
-        void SetPosition( sf::Vector3i position ) { myPosition = position; };
-        void SetTile( sf::Uint32 tile ) { myTile = tile; };
-        void SetAlpha( sf::Uint8 alpha ) { myAlpha = alpha; };
-
-        sf::Vector3i GetPosition() { return myPosition; };
-        sf::Uint32 GetTile() { return myTile; };
-        sf::Uint8 GetAlpha() { return myAlpha; };
-
+        const sf::Vector3i myPosition;
+        const sf::Uint32 myTileID;
+        const sf::Uint8 myAlpha;
 };
 
 #endif
