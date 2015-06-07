@@ -4,7 +4,7 @@
 bool saveChanges = false;
 
 Map::Map()
-{
+{/*
     // Start sqlite
     std::string dbName = mapFile;
     if( sqlite3_open_v2( dbName.c_str(), &db, SQLITE_OPEN_READWRITE, NULL ) )
@@ -39,27 +39,27 @@ Map::Map()
 
     else
         // Cell not found
-        std::cout << "Error grabbing max cell ID." << std::endl;
+        std::cout << "Error grabbing max cell ID." << std::endl;*/
 };
 
 // Set a particular tile
 void Map::SetTile( sf::Vector3i position, sf::Uint32 tile )
-{
+{/*
     // Make sure it exists!
     if( GetCell( position ) != 0 )
-        myCells[ GetCell( position ) ]->SetTile( ConvertToTilePosition( position ), tile );
+        myCells[ GetCell( position ) ]->SetTile( ConvertToTilePosition( position ), tile );*/
 };
 
 void Map::SetBiome( sf::Vector3i position, sf::Uint32 tile )
-{
+{/*
     // Make sure it exists!
     if( GetCell( position ) != 0 )
-        myCells[ GetCell( position ) ]->SetBiome( position, tile );
+        myCells[ GetCell( position ) ]->SetBiome( position, tile );*/
 };
 
 // Make sure we have all the proper areas loaded
 void Map::UpdateLoadedCells( sf::Vector3i position )
-{
+{/*
     // Which cells need to be loaded?
 
     // First, find what cell we are in
@@ -175,12 +175,12 @@ void Map::UpdateLoadedCells( sf::Vector3i position )
     {
         SaveCell( it );
         myCells.erase( it );
-    }
+    }*/
 };
 
 
 sf::Uint32 Map::LoadCell( sf::Vector3i position )
-{
+{/*
     // Make a SQL query
     std::string query = "SELECT ID FROM Cells WHERE X = ? AND Y = ?";
     sqlite3_stmt *statement;
@@ -276,7 +276,8 @@ sf::Uint32 Map::LoadCell( sf::Vector3i position )
 
     CreateCell( position, cellID );
 
-    return cellID;
+    return cellID;*/
+    return 0;
 };
 
 void Map::CreateCell( sf::Vector3i position, sf::Uint32 cell )
@@ -286,7 +287,7 @@ void Map::CreateCell( sf::Vector3i position, sf::Uint32 cell )
 
 
 void Map::LoadCellTileLayer( sf::Uint32 cell, sf::Vector3i position )
-{
+{/*
     std::vector< std::shared_ptr<Tile> > tiles;
 
     // Make a SQL query
@@ -347,13 +348,13 @@ void Map::LoadCellTileLayer( sf::Uint32 cell, sf::Vector3i position )
 
     sqlite3_finalize( statement );
 
-    return;
+    return;*/
 };
 
 
 // Save a cell to the database
 void Map::SaveCell( sf::Uint32 cell )
-{
+{/*
     if( saveChanges == false ) return;
 
     // Create the cell entry if it doesn't already exist
@@ -550,7 +551,7 @@ void Map::SaveCell( sf::Uint32 cell )
 
                 sqlite3_finalize( statement );
             }
-        }*/
+        }
     }
 
     // Now, save all tiles
@@ -635,18 +636,18 @@ void Map::SaveCell( sf::Uint32 cell )
                 }
             }
         }
-    }
+    }*/
 };
 
 
-void Map::DrawMap( sf::RenderWindow* window, sf::Vector3i position )
-{
+void Map::draw(sf::RenderTarget& target, sf::RenderStates states) const
+{/*
     for( auto& it : myCells )
-        it.second->DrawCell( window, position );
+        it.second->draw( target, states );*/
 };
 
 sf::Uint32 Map::GetCell( sf::Vector3i position )
-{
+{/*
     // Normalize the position
     position = ConvertToCellPosition( position );
 
@@ -654,37 +655,37 @@ sf::Uint32 Map::GetCell( sf::Vector3i position )
         if( (*it).second->GetPosition() == position )
             return (*it).first;
 
-    return 0;
+    return 0;*/
 };
 
 // Convert a world position to a cell position
 sf::Vector3i Map::ConvertToCellPosition( sf::Vector3i position )
-{
+{/*
     // Normalize the position
     position.z = 0;
 
     position.x = ( position.x / tileSize ) / cellWidth;
     position.y = ( position.y / tileSize ) / cellHeight;
 
-    return position;
+    return position;*/
 };
 
 // Convert a world position to a tile position (relative to its cell)
 sf::Vector3i Map::ConvertToTilePosition( sf::Vector3i position )
-{
+{/*
     // Normalize the position
     position.x = ( position.x / tileSize ) % cellWidth;
     position.y = ( position.y / tileSize ) % cellHeight;
 
-    return position;
+    return position;*/
 };
 
 Map::~Map()
-{
+{/*
     // Save all the open cells
     for( auto it = myCells.begin(); it != myCells.end(); ++it )
         SaveCell( (*it).first );
 
     delete texture;
-    sqlite3_close( db );
+    sqlite3_close( db );*/
 };

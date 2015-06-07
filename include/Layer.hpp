@@ -1,9 +1,10 @@
-#ifndef TILEMAP_H
-#define TILEMAP_H
+#ifndef LAYER_H
+#define LAYER_H
 
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include "Tile.hpp"
+#include "Settings.hpp"
 
 // Layer contains a VertexArray which holds the graphics for a cell
 
@@ -16,6 +17,11 @@ public:
     void SetBiome( sf::Uint32 biome );
     void AddTile( sf::Vector3i position, sf::Uint32 tile );
     void RemoveTile( sf::Vector3i position );
+
+    sf::Uint32 GetBiome() { return myBiome; };
+    sf::Uint32 GetArea()  { return myArea;  };
+    sf::Uint32 GetTile();
+
     void Clear();
 
 private:
@@ -32,4 +38,4 @@ private:
 
 };
 
-#endif // TILEMAP_H
+#endif // LAYER_H

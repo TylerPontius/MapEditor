@@ -1,5 +1,4 @@
 #include "Layer.hpp"
-#include "Map.hpp"
 
 Layer::Layer(sf::Texture* tileset, sf::Vector3i position ) : myTileset( tileset ), myPosition( position )
 {
@@ -14,7 +13,7 @@ Layer::Layer(sf::Texture* tileset, sf::Vector3i position ) : myTileset( tileset 
 void Layer::SetBiome( sf::Uint32 biome )
 {
     myBiome = biome;
-    // First, remove all of our tiles
+
     Clear();
 }
 
@@ -24,14 +23,13 @@ void Layer::AddTile( sf::Vector3i position, sf::Uint32 tile )
     // First, remove a tile if one already occupies the same position
     RemoveTile( position );
 
-    myTiles.emplace_back( position, tile, 255 );
-    auto& newTile = myTiles.back();
-    sf::Uint32 tileNumber = newTile.myTileID;
-    sf::Uint32 x = newTile->myPosition.x - myPosition.x, y = newTile->myPosition.y - myPosition.y;
+    // Add the tile and start computing
+    myTiles.emplace_back( std::make_unique<Tile> (position, tile, 255 ) );
+    sf::Uint32 x = position.x - myPosition.x, y = position.y - myPosition.y;
 
-    // find its position in the tileset texture
-    int tu = tileNumber % (myTileset->getSize().x / tileSize );
-    int tv = tileNumber / (myTileset->getSize().x / tileSize );
+    // Find its position in the tileset texture
+    int tu = tile % (myTileset->getSize().x / tileSize );
+    int tv = tile / (myTileset->getSize().x / tileSize );
 
     // Get a pointer to the current tile's quad
     sf::Vertex* quad = &myVertices[( (x + y) * cellWidth) * 4];
@@ -54,7 +52,7 @@ void Layer::RemoveTile( sf::Vector3i position )
 {
     // Remove the tile from our list
     std::remove_if( myTiles.begin(), myTiles.end(),
-                    [&] ( std::unique_ptr<Tile> tile ) { return (tile->myPosition == position); } );
+                    [&] ( auto& tile ) { return (tile->myPosition == position); } );
 
     // Find the relative position
     sf::Uint32 x = position.x - myPosition.x, y = position.y - myPosition.y;

@@ -1,5 +1,4 @@
 #include "Cell.hpp"
-#include "Map.hpp"
 #include <iostream>
 /*
 // Load the graphics for a tile layer

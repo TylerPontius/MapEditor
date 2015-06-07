@@ -22,19 +22,12 @@
 				<Option object_output="obj/Release/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Compiler>
-					<Add option="-O2" />
-				</Compiler>
-				<Linker>
-					<Add option="-s" />
-				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
-			<Add option="-Wextra" />
-			<Add option="-Wall" />
+			<Add option="-march=athlon-fx" />
 			<Add directory="../TGUI-0.7-dev/include" />
-			<Add directory="../SFML-2.2-dev/include" />
+			<Add directory="../SFML-2.3/include" />
 			<Add directory="include" />
 		</Compiler>
 		<Linker>
@@ -42,22 +35,21 @@
 			<Add library="sfml-graphics" />
 			<Add library="sfml-window" />
 			<Add library="sfml-system" />
-			<Add directory="../SFML-2.2-dev/bin/lib" />
-			<Add directory="../TGUI-0.7-dev/bin/lib" />
+			<Add directory="../SFML-2.3/lib" />
+			<Add directory="../TGUI-0.7-dev/lib" />
 		</Linker>
+		<Unit filename="extlibs/sqlite3.def" />
 		<Unit filename="include/Cell.hpp" />
 		<Unit filename="include/Layer.hpp" />
 		<Unit filename="include/Map.hpp" />
 		<Unit filename="include/SQLFunctions.hpp" />
+		<Unit filename="include/Settings.hpp" />
 		<Unit filename="include/Tile.hpp" />
 		<Unit filename="source/Cell.cpp" />
 		<Unit filename="source/Layer.cpp" />
 		<Unit filename="source/Map.cpp" />
 		<Unit filename="source/SQLFunctions.cpp" />
 		<Unit filename="source/main.cpp" />
-		<Unit filename="source/sqlite3.c">
-			<Option compilerVar="CC" />
-		</Unit>
 		<Extensions>
 			<code_completion />
 			<envvars />

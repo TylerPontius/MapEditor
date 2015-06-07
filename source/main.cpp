@@ -38,10 +38,7 @@ int main()
     }
 
     // Set the position
-    sf::Vector3i position;
-    position.x = 0;
-    position.y = 0;
-    position.z = 0;
+    sf::Vector3i position( 0, 0, 0 );
 
 
     // Load the map
@@ -136,15 +133,15 @@ int main()
 
                 // Set the selected cell's biome
                 if( event.key.code == sf::Keyboard::B )
-                    worldMap.SetCellBiome( position, currentTile );
+                    worldMap.SetBiome( position, currentTile );
 
                 // Set the selected tile
                 if( event.key.code == sf::Keyboard::E )
-                    worldMap.SetCellTile( position, currentTile );
+                    worldMap.SetTile( position, currentTile );
 
                 // Clear the cell
                 if( event.key.code == sf::Keyboard::C )
-                    worldMap.SetCellBiome( position, 0 );
+                    worldMap.SetBiome( position, 0 );
 
                 // Toggle saving
                 if( event.key.code == sf::Keyboard::Z )
@@ -294,7 +291,7 @@ int main()
         window.setView( view );
 
         // draw everything here...
-        worldMap.DrawMap( &window, position );
+        window.draw( worldMap );
 
         window.draw( selection );
         window.draw( selectionCell );

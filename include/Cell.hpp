@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <map>
+#include <string>
 #include "Layer.hpp"
 
 // A cell is a portion of the map.
@@ -23,7 +24,7 @@ public:
     void SetTile( sf::Vector3i position, sf::Uint32 tile );
     void SetBiome( sf::Vector3i position, sf::Uint32 tile );
 
-    std::shared_ptr<Tile> GetTile( sf::Vector3i position );
+    sf::Uint32 GetTile( sf::Vector3i position );
     sf::Uint32 GetBiome( sf::Vector3i position );
 
     sf::Uint32 GetID() { return myID; };
@@ -36,7 +37,7 @@ private:
     // Map of all Z layers
     // The first half represents Z level,
     // the second half represents data about that layer
-    std::map< sf::Int32, std::unique_ptr<Layer> > myLayers;
+    std::map< sf::Int32, Layer > myLayers;
 };
 
 #endif
