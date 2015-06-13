@@ -6,12 +6,12 @@
 class Tile
 {
     public:
-        Tile( sf::Vector3i position, sf::Uint32 tileID, sf::Uint8 alpha ) : myPosition( position ), myTileID( tileID ), myAlpha( alpha ) {};
+        Tile( const sf::Vector3i position, const sf::Uint32 tileID, const sf::Uint8 alpha ) : myPosition( position ), myTileID( tileID ), myAlpha( alpha ) {};
         ~Tile() {};
 
-        const sf::Vector3i myPosition;
-        const sf::Uint32 myTileID;
-        const sf::Uint8 myAlpha;
+        sf::Vector3i myPosition;
+        sf::Uint32 myTileID;
+        sf::Uint8 myAlpha;
 };
 
 #endif

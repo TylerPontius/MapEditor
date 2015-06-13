@@ -12,24 +12,24 @@ class Layer : public sf::Drawable, public sf::Transformable
 {
 public:
 
-    Layer( sf::Texture* tileset, sf::Vector3i position );
+    Layer( sf::Vector3i position, sf::Texture* tileset );
 
     void SetBiome( sf::Uint32 biome );
-    void AddTile( sf::Vector3i position, sf::Uint32 tile );
-    void RemoveTile( sf::Vector3i position );
+    void SetArea( sf::Uint32 area ) { myArea = area; };
 
-    sf::Uint32 GetBiome() { return myBiome; };
-    sf::Uint32 GetArea()  { return myArea;  };
-    sf::Uint32 GetTile();
+    void SetTile( sf::Vector3i position, sf::Uint32 tile );
 
-    void Clear();
+    sf::Uint32 GetBiome()   { return myBiome; };
+    sf::Uint32 GetArea()    { return myArea;  };
+    sf::Uint32 GetTile( sf::Vector3i position );
 
 private:
+    void Clear();
 
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
     sf::VertexArray myVertices;
-    std::vector< std::unique_ptr<Tile> > myTiles;
+    std::vector<Tile> myTiles;
 
     sf::Texture* myTileset;
     sf::Vector3i myPosition;

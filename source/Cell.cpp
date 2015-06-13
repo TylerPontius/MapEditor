@@ -21,42 +21,20 @@ void Cell::InitTileLayer( std::vector< std::shared_ptr<Tile> > tiles, sf::Vector
     }
 };*/
 
-
-void Cell::draw(sf::RenderTarget& target, sf::RenderStates states) const
-{/*
-    // Make sure we don't draw other layers
-    // Exploit integer division to round to the nearest layer base
-    if( position.z >= 0 )
-        position.z /= drawLayers;
-    else
-    {
-        position.z -= drawLayers-1;
-        position.z /= drawLayers;
-    }
-    position.z *= drawLayers;
-
-    for( auto it : myTileMaps )
-        if( it.first == position.z )
-            window->draw( myTileMaps[position.z] );*/
-};
-
-void Cell::SetTile( sf::Vector3i position, sf::Uint32 tile )
-{/*
+void Cell::SetTile( sf::Vector3i position, sf::Uint32 tile, sf::Texture* tileset )
+{
     // Make sure we have a layer for the tile
-    auto& layer = myTiles[ position.z ];
-    InitializeTileMap( position );
+    AddLayer( position, tileset );
 
-    // Remove the existing tile from the layer if it already exists
-    std::remove_if( layer.begin(), layer.end(),
-                    [&] ( std::shared_ptr<Tile> pos ) { return (pos->position == position); } );
-
-    // Make the new tile
-    auto newTile = layer.emplace( layer.end(), std:*/
+    // Set the tile
+    auto& layer = myLayers.find( position.z );
+    if( layer != myLayers.end() )
+        layer.GetBiome();//.SetTile( position, tile );
 };
 
 
 // Set a Z layer to have a biome
-void Cell::SetBiome( sf::Vector3i position, sf::Uint32 tile )
+void Cell::SetBiome( sf::Vector3i position, sf::Uint32 tile, sf::Texture* tileset )
 {/*
     // Make sure we have a layer for the tile
     InitializeTileMap( position );
@@ -97,21 +75,41 @@ sf::Uint32 Cell::GetBiome( sf::Vector3i position )
     else
         return biome->second;*/
 };
-/*
-// Initialize the graphics for the TileMap
-//void Cell::InitializeTileMap( sf::Vector3i position )
-{
-    // Create the tile map if we need to
-    if( myTileMaps.find( position.z ) == myTileMaps.end() )
+
+void Cell::draw(sf::RenderTarget& target, sf::RenderStates states) const
+{/*
+    // Make sure we don't draw other layers
+    // Exploit integer division to round to the nearest layer base
+    if( position.z >= 0 )
+        position.z /= drawLayers;
+    else
     {
-        myTileMaps.emplace( position.z, std::make_shared<TileMap>(myTexture) );
+        position.z -= drawLayers-1;
+        position.z /= drawLayers;
     }
+    position.z *= drawLayers;
 
-    // Grab the tile map
-    auto tMap = myTileMaps[position.z];
+    for( auto it : myTileMaps )
+        if( it.first == position.z )
+            window->draw( myTileMaps[position.z] );*/
+};
 
-    // Set the tile info
-    tMap.setOrigin( 0.f, 0.f );
-    tMap.setPosition( myPosition.x * tileSize * cellWidth, myPosition.y  * tileSize * cellHeight );
-};*/
+// Create a layer if it doesn't exist
+void Cell::AddLayer( sf::Vector3i position, sf::Texture* tileset )
+{
+    if( myLayers.find( position.z ) == myLayers.end() )
+    {
+        myLayers.emplace( position.z, Layer{sf::Vector3i( myPosition.x, myPosition.y, position.z ), tileset} );
+
+        // Set the tile info
+        myLayers[position.z].setOrigin( 0.f, 0.f );
+        myLayers[position.z].setPosition( myPosition.x * tileSize * cellWidth, myPosition.y  * tileSize * cellHeight );
+    }
+};
+
+void Cell::RemoveLayer( sf::Vector3i position )
+{
+    if( myLayers.find( position.z ) != myLayers.end() )
+        myLayers.erase( position.z );
+};
 

@@ -17,12 +17,9 @@ class Cell : public sf::Drawable
 
 public:
     Cell( sf::Uint32 id, sf::Vector3i position ) : myID( id ), myPosition( position ) {};
-    ~Cell() {};
 
-    virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
-
-    void SetTile( sf::Vector3i position, sf::Uint32 tile );
-    void SetBiome( sf::Vector3i position, sf::Uint32 tile );
+    void SetTile( sf::Vector3i position, sf::Uint32 tile, sf::Texture* tileset );
+    void SetBiome( sf::Vector3i position, sf::Uint32 tile, sf::Texture* tileset );
 
     sf::Uint32 GetTile( sf::Vector3i position );
     sf::Uint32 GetBiome( sf::Vector3i position );
@@ -31,6 +28,11 @@ public:
     sf::Vector3i GetPosition() { return myPosition; };
 
 private:
+    virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+
+    void AddLayer( sf::Vector3i position, sf::Texture* tileset );
+    void RemoveLayer( sf::Vector3i position );
+
     sf::Uint32 myID;
     sf::Vector3i myPosition;
 
