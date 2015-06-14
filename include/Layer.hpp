@@ -34,7 +34,7 @@ private:
     sf::Texture* myTileset;
     sf::Vector3i myPosition;
 
-    sf::Uint32 myBiome, myArea;
+    sf::Uint32 myBiome = 0, myArea = 0;
 
 };
 
