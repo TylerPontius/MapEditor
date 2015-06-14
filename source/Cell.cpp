@@ -27,9 +27,7 @@ void Cell::SetTile( sf::Vector3i position, sf::Uint32 tile, sf::Texture* tileset
     AddLayer( position, tileset );
 
     // Set the tile
-    auto& layer = myLayers.find( position.z );
-    if( layer != myLayers.end() )
-        layer.GetBiome();//.SetTile( position, tile );
+    myLayers.at( position.z ).SetTile( position, tile );
 };
 
 
@@ -101,9 +99,11 @@ void Cell::AddLayer( sf::Vector3i position, sf::Texture* tileset )
     {
         myLayers.emplace( position.z, Layer{sf::Vector3i( myPosition.x, myPosition.y, position.z ), tileset} );
 
+        Layer& newLayer = myLayers.at( position.z );
+
         // Set the tile info
-        myLayers[position.z].setOrigin( 0.f, 0.f );
-        myLayers[position.z].setPosition( myPosition.x * tileSize * cellWidth, myPosition.y  * tileSize * cellHeight );
+        newLayer.setOrigin( 0.f, 0.f );
+        newLayer.setPosition( myPosition.x * tileSize * cellWidth, myPosition.y  * tileSize * cellHeight );
     }
 };
 
