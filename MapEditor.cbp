@@ -22,10 +22,10 @@
 				<Option object_output="obj/Release/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
 			</Target>
 		</Build>
 		<Compiler>
-			<Add option="-march=athlon-fx" />
 			<Add directory="../TGUI-0.7-dev/include" />
 			<Add directory="../SFML-2.3/include" />
 			<Add directory="include" />

@@ -3,14 +3,13 @@
 
 #include <string>
 #include <iostream>
-#include <sqlite3.h>
 #include <memory>
 #include "Cell.hpp"
 
 // Map class manages the entire world map
 // Any external program functions will interact with this.
 
-class Map : public sf::Drawable
+class Map : public sf::Drawable, sf::Transformable
 {
 public:
     Map();
@@ -26,20 +25,20 @@ public:
 
 
 
-    void CreateCell( sf::Vector3i position, sf::Uint32 cell );
-    sf::Uint32 LoadCell( sf::Vector3i position );
+    void CreateCell( sf::Vector3i position, sf::Uint32 cellID );
+    void LoadCell( sf::Vector3i position );
 
     void LoadCellTileLayer( sf::Uint32 cell, sf::Vector3i position );
     sf::Uint32 GetCell( sf::Vector3i position );
 
     void SaveCell( sf::Uint32 cell );
 
-    sf::Vector3i ConvertToCellPosition( sf::Vector3i position );
-    sf::Vector3i ConvertToTilePosition( sf::Vector3i position );
+    void ConvertToCellPosition( sf::Vector3i& position );
+    void ConvertToTilePosition( sf::Vector3i& position );
 
-    sqlite3* db;
-    std::map< sf::Uint32, std::unique_ptr<Cell> > myCells;
-    sf::Texture* texture;
+    sqlite3* mapDB;
+    std::map< sf::Uint32, Cell > myCells;
+    sf::Texture* tileset;
     sf::Uint32 maxCellID;
 };
 

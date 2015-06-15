@@ -4,6 +4,7 @@
 #include <memory>
 #include <map>
 #include <string>
+#include <sqlite3.h>
 #include "Layer.hpp"
 
 // A cell is a portion of the map.
@@ -12,11 +13,11 @@
 
 // A cell contains all layers from bottom to top
 
-class Cell : public sf::Drawable
+class Cell : public sf::Drawable, public sf::Transformable
 {
 
 public:
-    Cell( sf::Uint32 id, sf::Vector3i position ) : myID( id ), myPosition( position ) {};
+    Cell( sf::Uint32 id, sf::Vector3i position, sf::Texture* tileset, sqlite3* db );
 
     void SetTile( sf::Vector3i position, sf::Uint32 tile, sf::Texture* tileset );
     void SetBiome( sf::Vector3i position, sf::Uint32 tile, sf::Texture* tileset );

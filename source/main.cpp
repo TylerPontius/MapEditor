@@ -5,9 +5,7 @@
 
 #include "Map.hpp"
 
-const std::string version = "0.2";
-
-
+sf::Vector3i globalPosition( 0, 0, 0 );
 
 int main()
 {
@@ -37,14 +35,15 @@ int main()
         return 1;
     }
 
-    // Set the position
-    sf::Vector3i position( 0, 0, 0 );
+    // Set the global view position and the selection box position
+    sf::Vector3i selectPosition( 0, 0, 0 );
+
 
 
     // Load the map
     sf::Clock cl;
     Map worldMap;
-    worldMap.UpdateLoadedCells( position );
+    worldMap.UpdateLoadedCells( globalPosition );
     std::cout << cl.getElapsedTime().asMicroseconds() << "us to load map\n";
 
     // Load the tile selector
@@ -105,43 +104,56 @@ int main()
             if( event.type == sf::Event::MouseButtonPressed )
             {
                 // Get the current mouse position in world coords
-                sf::Vector2f worldPos( window.mapPixelToCoords( sf::Mouse::getPosition(window) ) );
+                sf::Vector2f worldPos( window.mapPixelToCoords( sf::Mouse::getPosition( window ) ) );
 
-                position.x = worldPos.x;
-                position.y = worldPos.y;
+                selectPosition.x = worldPos.x;
+                selectPosition.y = worldPos.y;
 
                 // Snap to grid
-                position.x -= position.x % tileSize;
-                position.y -= position.y % tileSize;
+                selectPosition.x -= selectPosition.x % tileSize;
+                selectPosition.y -= selectPosition.y % tileSize;
             }
 
             if( event.type == sf::Event::KeyPressed )
             {
                 // Z layer switching between levels
                 if( event.key.code == sf::Keyboard::PageUp )
-                    position.z += drawLayers;
+                {
+                    selectPosition.z += drawLayers;
+                    globalPosition.z += drawLayers;
+                }
+
 
                 if( event.key.code == sf::Keyboard::PageDown )
-                    position.z -= drawLayers;
+                {
+                    selectPosition.z -= drawLayers;
+                    globalPosition.z -= drawLayers;
+                }
 
                 // Z layer switching within levels
                 if( event.key.code == sf::Keyboard::Key::Add )
-                    position.z += 1;
+                {
+                    selectPosition.z += 1;
+                    globalPosition.z += 1;
+                }
 
                 if( event.key.code == sf::Keyboard::Key::Subtract )
-                    position.z -= 1;
+                {
+                    selectPosition.z -= 1;
+                    globalPosition.z -= 1;
+                }
 
                 // Set the selected cell's biome
                 if( event.key.code == sf::Keyboard::B )
-                    worldMap.SetBiome( position, currentTile );
+                    worldMap.SetBiome( selectPosition, currentTile );
 
                 // Set the selected tile
                 if( event.key.code == sf::Keyboard::E )
-                    worldMap.SetTile( position, currentTile );
+                    worldMap.SetTile( selectPosition, currentTile );
 
                 // Clear the cell
                 if( event.key.code == sf::Keyboard::C )
-                    worldMap.SetBiome( position, 0 );
+                    worldMap.SetBiome( selectPosition, 0 );
 
                 // Toggle saving
                 if( event.key.code == sf::Keyboard::Z )
@@ -183,11 +195,10 @@ int main()
                     if( view.getCenter().y + windowHeight / 2 > mapWidth * tileSize )
                         view.setCenter( view.getCenter().x, mapWidth * tileSize - windowHeight / 2 );
 
-                    sf::Vector3i viewPos;
-                    viewPos.x = view.getCenter().x;
-                    viewPos.y = view.getCenter().y;
+                    globalPosition.x = view.getCenter().x;
+                    globalPosition.y = view.getCenter().y;
 
-                    worldMap.UpdateLoadedCells( viewPos );
+                    worldMap.UpdateLoadedCells( globalPosition );
                 }
 
                 // If a movement button changed state
@@ -198,7 +209,7 @@ int main()
                       event.key.code == sf::Keyboard::Right ) )
                 {
                     sf::Int32 increment = tileSize;
-                    sf::Vector2f offset( 0, 0 );
+                    sf::Vector2i offset( 0, 0 );
 
                     switch( event.key.code )
                     {
@@ -209,8 +220,8 @@ int main()
                         default: break;
                     }
 
-                    position.x += offset.x;
-                    position.y += offset.y;
+                    selectPosition.x += offset.x;
+                    selectPosition.y += offset.y;
                 }
             }
 
@@ -249,7 +260,7 @@ int main()
             gui.handleEvent(event);
 
             // Update our selection rectangles
-            UpdateSelection( selection, selectionCell, position );
+            UpdateSelection( selection, selectionCell, selectPosition );
         }
 
 
@@ -282,7 +293,7 @@ int main()
             std::stringstream ss;
             if( saveChanges ) ss << "Saving on, ";
             else ss << "Saving off, ";
-            ss << "Z = " << position.z;
+            ss << "Z = " << selectPosition.z;
             labelZPos->setText( ss.str() );
         }
 

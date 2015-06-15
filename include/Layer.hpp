@@ -15,12 +15,15 @@ public:
     Layer( sf::Vector3i position, sf::Texture* tileset );
 
     void SetBiome( sf::Uint32 biome );
-    void SetArea( sf::Uint32 area ) { myArea = area; };
+    void SetRegion( sf::Uint32 region ) { myRegion = region; };
+    void SetAir( sf::Uint32 air ) { myAir = air; };
 
     void SetTile( sf::Vector3i position, sf::Uint32 tile );
 
-    sf::Uint32 GetBiome()   { return myBiome; };
-    sf::Uint32 GetArea()    { return myArea;  };
+    sf::Uint32 GetBiome()  { return myBiome;  };
+    sf::Uint32 GetRegion() { return myRegion; };
+    sf::Uint32 GetAir()    { return myAir;    };
+
     sf::Uint32 GetTile( sf::Vector3i position );
 
 private:
@@ -31,10 +34,10 @@ private:
     sf::VertexArray myVertices;
     std::vector<Tile> myTiles;
 
-    sf::Texture* myTileset;
     sf::Vector3i myPosition;
+    sf::Texture* myTileset;
 
-    sf::Uint32 myBiome = 0, myArea = 0;
+    sf::Uint32 myBiome = 0, myRegion = 0, myAir = 0;
 
 };
 

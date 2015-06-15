@@ -4,57 +4,55 @@
 bool saveChanges = false;
 
 Map::Map()
-{/*
-    // Start sqlite
-    std::string dbName = mapFile;
-    if( sqlite3_open_v2( dbName.c_str(), &db, SQLITE_OPEN_READWRITE, NULL ) )
-    {
-        std::cout << "Failed to open db!" << sqlite3_extended_errcode( db ) << std::endl;
-    }
-
+{
     // Make the tiles
     sf::Image temp;
     temp.loadFromFile( tilesetFile );
     temp.createMaskFromColor( temp.getPixel( temp.getSize().x-1, temp.getSize().y-1 ) );
 
-    texture = new sf::Texture;
-    texture->loadFromImage( temp );
+    tileset = new sf::Texture;
+    tileset->loadFromImage( temp );
+
+    // start sqlite
+    if( sqlite3_open_v2( mapFile.c_str(), &mapDB, SQLITE_OPEN_READWRITE, NULL ) )
+    {
+        std::cout << "Failed to open db!" << sqlite3_extended_errcode( mapDB ) << std::endl;
+    }
 
     // Set up the new cell ID counter
     // Make a SQL query
     sqlite3_stmt *statement;
     std::string query = "SELECT MAX(ID) FROM Cells";
 
-    int err = sqlite3_prepare_v2( db, query.c_str(), -1, &statement, NULL );
+    int err = sqlite3_prepare_v2( mapDB, query.c_str(), -1, &statement, NULL );
     if( err != SQLITE_OK )
-    {
-        std::cout << "Query failed! " << err << " " << sqlite3_errmsg( db ) << std::endl;
-        return;
-    }
+        std::cout << "Query failed! " << err << " " << sqlite3_errmsg( mapDB ) << std::endl;
 
     // Grab the ID
     err = sqlite3_step( statement );
     if( err == SQLITE_ROW )
         maxCellID = sqlite3_column_int( statement, 0 );
 
+    else if( err == SQLITE_DONE )
+        maxCellID = 0;
+
     else
-        // Cell not found
-        std::cout << "Error grabbing max cell ID." << std::endl;*/
+        std::cout << "Error grabbing max cell ID." << std::endl;
 };
 
 // Set a particular tile
 void Map::SetTile( sf::Vector3i position, sf::Uint32 tile )
-{/*
+{
     // Make sure it exists!
     if( GetCell( position ) != 0 )
-        myCells[ GetCell( position ) ]->SetTile( ConvertToTilePosition( position ), tile );*/
+        myCells.at( GetCell( position ) ).SetTile( position, tile, tileset );
 };
 
 void Map::SetBiome( sf::Vector3i position, sf::Uint32 tile )
-{/*
+{
     // Make sure it exists!
     if( GetCell( position ) != 0 )
-        myCells[ GetCell( position ) ]->SetBiome( position, tile );*/
+        myCells.at( GetCell( position ) ).SetBiome( position, tile, tileset );
 };
 
 // Make sure we have all the proper areas loaded
@@ -179,176 +177,67 @@ void Map::UpdateLoadedCells( sf::Vector3i position )
 };
 
 
-sf::Uint32 Map::LoadCell( sf::Vector3i position )
-{/*
+void Map::LoadCell( sf::Vector3i position )
+{
+    // Make sure it's not already loaded
+    if( myCells.find( position.z ) != myCells.end() )
+        return;
+
     // Make a SQL query
     std::string query = "SELECT ID FROM Cells WHERE X = ? AND Y = ?";
     sqlite3_stmt *statement;
 
-    int err = sqlite3_prepare_v2( db, query.c_str(), -1, &statement, NULL );
+    int err = sqlite3_prepare_v2( mapDB, query.c_str(), -1, &statement, NULL );
     if( err != SQLITE_OK )
     {
-        std::cout << "Query failed! " << err << " " << sqlite3_errmsg( db ) << std::endl;
-        return 0;
+        std::cout << "Query failed! " << err << " " << sqlite3_errmsg( mapDB ) << std::endl;
+        return;
     }
 
     // Bind our request
     err = sqlite3_bind_int( statement, 1, position.x );
-    if( err != SQLITE_OK )
-    {
-        std::cout << "Bind failed! " << err << " " << sqlite3_errmsg( db ) << std::endl;
-        return 0;
-    }
     err = sqlite3_bind_int( statement, 2, position.y );
     if( err != SQLITE_OK )
     {
-        std::cout << "Bind failed! " << err << " " << sqlite3_errmsg( db ) << std::endl;
-        return 0;
+        std::cout << "Bind failed! " << err << " " << sqlite3_errmsg( mapDB ) << std::endl;
+        return;
     }
 
-    // Grab the ID
+    // Looks good! Step it
     err = sqlite3_step( statement );
+
     sf::Uint32 cellID;
+
+    // We got some data!
     if( err == SQLITE_ROW )
-    {
         cellID = sqlite3_column_int( statement, 0 );
-    }
+
+    // Cell doesn't exist! Let's create it.
     else if( err == SQLITE_DONE )
-    {
-        // Cell not found
-        return 0;
-    }
+        cellID = ++maxCellID;
+
+    // Database error!
     else
     {
-        std::cout << "Step failed! " << err << " " << sqlite3_errmsg( db ) << std::endl;
-        return 0;
+        std::cout << "Step failed!" << err << " " << sqlite3_errmsg( mapDB ) << std::endl;
+        return;
     }
-
-
-    // Now grab all the Biomes and Areas
-    // Make a SQL query
-    query = "SELECT Z, Biome, Area FROM Biomes WHERE Cell = ?";
-
-    err = sqlite3_prepare_v2( db, query.c_str(), -1, &statement, NULL );
-    if( err != SQLITE_OK )
-    {
-        std::cout << "Query failed! " << err << " " << sqlite3_errmsg( db ) << std::endl;
-        return 0;
-    }
-
-    // Bind our request
-    err = sqlite3_bind_int( statement, 1, cellID );
-    if( err != SQLITE_OK )
-    {
-        std::cout << "Bind failed! " << err << " " << sqlite3_errmsg( db ) << std::endl;
-        return 0;
-    }
-
-    // Looks good! Step it
-    bool stop = false;
-    std::map< sf::Int32, sf::Uint32 > biomes, areas;
-    while( stop == false )
-    {
-        // Make sure we still have a row to read
-        err = sqlite3_step( statement );
-        if( err == SQLITE_DONE )
-            stop = true;
-        else if( err != SQLITE_DONE and err != SQLITE_ROW )
-        {
-            std::cout << "Step failed! " << err << " " << sqlite3_errmsg( db ) << std::endl;
-            return 0;
-        }
-        else
-        {
-            // Everything is good to go! Make a new biome entry
-            sf::Int32 zPos;
-            sf::Uint32 biome, area;
-            zPos  = sqlite3_column_int( statement, 0 );
-            biome = sqlite3_column_int( statement, 1 );
-            area  = sqlite3_column_int( statement, 2 );
-            //                                                     Z   Value
-            biomes. insert( std::pair< sf::Int32, sf::Uint32 > ( zPos, biome ) );
-            areas.  insert( std::pair< sf::Int32, sf::Uint32 > ( zPos, area  ) );
-        }
-    }
-
-    sqlite3_finalize( statement );
 
     CreateCell( position, cellID );
+}
 
-    return cellID;*/
-    return 0;
-};
-
-void Map::CreateCell( sf::Vector3i position, sf::Uint32 cell )
+void Map::CreateCell( sf::Vector3i position, sf::Uint32 cellID )
 {
-    //myCells.insert( std::pair< sf::Uint32, std::shared_ptr<Cell> > ( cell, std::shared_ptr<Cell>(new Cell( cell, position, texture )) ) );
-};
-
-
-void Map::LoadCellTileLayer( sf::Uint32 cell, sf::Vector3i position )
-{/*
-    std::vector< std::shared_ptr<Tile> > tiles;
-
-    // Make a SQL query
-    std::string query = "SELECT X, Y, Tile FROM Tiles WHERE Cell = ? AND Z = ?";
-    sqlite3_stmt *statement;
-
-    int err = sqlite3_prepare_v2( db, query.c_str(), -1, &statement, NULL );
-    if( err != SQLITE_OK )
+    if( myCells.find( position.z ) == myCells.end() )
     {
-        std::cout << "Query failed! " << err << " " << sqlite3_errmsg( db ) << std::endl;
-        return;
+        myCells.emplace( cellID, Cell{ cellID, position, tileset, mapDB } );
+
+        Cell& cell = myCells.at( cellID );
+
+        // Set the tile info
+        cell.setOrigin( 0.f, 0.f );
+        cell.setPosition( position.x * tileSize * cellWidth, position.y  * tileSize * cellHeight );
     }
-
-    // Bind our request
-    err = sqlite3_bind_int( statement, 1, cell );
-    if( err != SQLITE_OK )
-    {
-        std::cout << "Bind failed! " << err << " " << sqlite3_errmsg( db ) << std::endl;
-        return;
-    }
-    err = sqlite3_bind_int( statement, 2, position.z );
-    if( err != SQLITE_OK )
-    {
-        std::cout << "Bind failed! " << err << " " << sqlite3_errmsg( db ) << std::endl;
-        return;
-    }
-
-    // Looks good! Step it
-    bool stop = false;
-    while( stop == false )
-    {
-        // Make sure we still have a row to read
-        err = sqlite3_step( statement );
-        if( err == SQLITE_DONE )
-            stop = true;
-        else if( err != SQLITE_DONE and err != SQLITE_ROW )
-        {
-            std::cout << "Step failed! " << err << " " << sqlite3_errmsg( db ) << std::endl;
-            return;
-        }
-        else
-        {
-            // Everything is good to go! Make a new tile
-            sf::Vector3i tilePos;
-            tilePos.x = sqlite3_column_int( statement, 0 );
-            tilePos.y = sqlite3_column_int( statement, 1 );
-            tilePos.z = position.z;
-
-            sf::Uint32 tileID = sqlite3_column_int( statement, 2 );
-
-            // Make sure the tile isn't outside cell bounds
-            if( tilePos.x >= 0 and tilePos.x < cellWidth and tilePos.y >= 0 and tilePos.y < cellHeight )
-                tiles.push_back( std::shared_ptr<Tile> ( new Tile( tilePos, tileID, 255 ) ) );
-        }
-    }
-
-    //myCells[cell]->InitTileLayer( tiles, position );
-
-    sqlite3_finalize( statement );
-
-    return;*/
 };
 
 
@@ -483,7 +372,7 @@ void Map::SaveCell( sf::Uint32 cell )
     }
 
     // Now, save all biomes
-    {/*
+    {
         // Download the info from the cell
         auto biomes = myCells[ cell ]->GetBiomes();
         auto areas  = myCells[ cell ]->GetAreas ();
@@ -641,51 +530,41 @@ void Map::SaveCell( sf::Uint32 cell )
 
 
 void Map::draw(sf::RenderTarget& target, sf::RenderStates states) const
-{/*
+{
     for( auto& it : myCells )
-        it.second->draw( target, states );*/
+        target.draw( it.second, states );
 };
 
 sf::Uint32 Map::GetCell( sf::Vector3i position )
-{/*
-    // Normalize the position
-    position = ConvertToCellPosition( position );
+{
+    for( auto& it : myCells )
+        if( it.second.GetPosition() == position )
+            return it.second.GetID();
 
-    for( auto it = myCells.begin(); it != myCells.end(); ++it )
-        if( (*it).second->GetPosition() == position )
-            return (*it).first;
-
-    return 0;*/
+    return 0;
 };
 
 // Convert a world position to a cell position
-sf::Vector3i Map::ConvertToCellPosition( sf::Vector3i position )
-{/*
-    // Normalize the position
-    position.z = 0;
-
+void Map::ConvertToCellPosition( sf::Vector3i& position )
+{
     position.x = ( position.x / tileSize ) / cellWidth;
     position.y = ( position.y / tileSize ) / cellHeight;
-
-    return position;*/
 };
 
 // Convert a world position to a tile position (relative to its cell)
-sf::Vector3i Map::ConvertToTilePosition( sf::Vector3i position )
-{/*
-    // Normalize the position
+void Map::ConvertToTilePosition( sf::Vector3i& position )
+{
     position.x = ( position.x / tileSize ) % cellWidth;
     position.y = ( position.y / tileSize ) % cellHeight;
-
-    return position;*/
 };
 
 Map::~Map()
-{/*
+{
     // Save all the open cells
-    for( auto it = myCells.begin(); it != myCells.end(); ++it )
-        SaveCell( (*it).first );
+    if( saveChanges )
+        for( auto& it : myCells )
+            SaveCell( it.second.GetID() );
 
-    delete texture;
-    sqlite3_close( db );*/
+    delete tileset;
+    sqlite3_close( mapDB );
 };

@@ -1,6 +1,9 @@
 #ifndef SETTINGS_HP
 #define SETTINGS_H
 
+// Version of this program
+const std::string version = "0.2";
+
 // Map file name
 const std::string mapFile = "map.db";
 
@@ -27,6 +30,9 @@ const sf::Uint32 windowWidth = 1024;
 
 // How many layers to draw
 const sf::Uint32 drawLayers = 16;
+
+// Current position (used for drawing)
+extern sf::Vector3i globalPosition;
 
 // Should map changes be saved?
 extern bool saveChanges;
