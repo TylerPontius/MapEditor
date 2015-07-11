@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <memory>
+#include <SQLiteCpp/SQLiteCpp.h>
 #include "Cell.hpp"
 
 // Map class manages the entire world map
@@ -23,20 +24,17 @@ public:
  private:
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
-
-
     void CreateCell( sf::Vector3i position, sf::Uint32 cellID );
     void LoadCell( sf::Vector3i position );
 
-    void LoadCellTileLayer( sf::Uint32 cell, sf::Vector3i position );
     sf::Uint32 GetCell( sf::Vector3i position );
 
-    void SaveCell( sf::Uint32 cell );
+    void RemoveCell( sf::Uint32 cellID );
 
     void ConvertToCellPosition( sf::Vector3i& position );
     void ConvertToTilePosition( sf::Vector3i& position );
 
-    sqlite3* mapDB;
+    //sqlite3* mapDB;
     std::map< sf::Uint32, Cell > myCells;
     sf::Texture* tileset;
     sf::Uint32 maxCellID;

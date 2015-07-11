@@ -50,18 +50,20 @@
 	<unicode/ubrk.h>
 	<unicode/utf16.h>
 
-1433367185 source:c:\users\tyler\documents\armageddononline\mapeditor\source\cell.cpp
+1436116459 source:c:\users\tyler\documents\armageddononline\mapeditor\source\cell.cpp
 	"Cell.hpp"
 	<iostream>
 
-1434144513 c:\users\tyler\documents\armageddononline\mapeditor\include\cell.hpp
+1436116459 c:\users\tyler\documents\armageddononline\mapeditor\include\cell.hpp
 	<memory>
 	<map>
 	<string>
+	<sqlite3.h>
 	"Layer.hpp"
 
-1434142768 c:\users\tyler\documents\armageddononline\mapeditor\include\tile.hpp
+1436490763 c:\users\tyler\documents\armageddononline\mapeditor\include\tile.hpp
 	<SFML/System.hpp>
+	<iostream>
 
 1412380802 c:\users\tyler\documents\armageddononline\sfml-2.2-dev\include\sfml\system.hpp
 	<SFML/Config.hpp>
@@ -421,17 +423,17 @@
 	<string>
 	<vector>
 
-1433689274 c:\users\tyler\documents\armageddononline\mapeditor\include\map.hpp
+1436619583 c:\users\tyler\documents\armageddononline\mapeditor\include\map.hpp
 	<string>
 	<iostream>
-	<sqlite3.h>
 	<memory>
+	<SQLiteCpp/SQLiteCpp.h>
 	"Cell.hpp"
 
 1430074006 c:\users\tyler\documents\armageddononline\mapeditor\include\sqlite3.h
 	<stdarg.h>
 
-1433375167 source:c:\users\tyler\documents\armageddononline\mapeditor\source\map.cpp
+1436619583 source:c:\users\tyler\documents\armageddononline\mapeditor\source\map.cpp
 	"Map.hpp"
 	<math.h>
 
@@ -443,7 +445,7 @@
 	"Tile.hpp"
 	<iostream>
 
-1433714949 source:c:\users\tyler\documents\armageddononline\mapeditor\source\main.cpp
+1434313441 source:c:\users\tyler\documents\armageddononline\mapeditor\source\main.cpp
 	<TGUI/TGUI.hpp>
 	<string>
 	<iostream>
@@ -655,27 +657,26 @@
 1433378247 c:\users\tyler\documents\armageddononline\tgui-0.7-dev\include\tgui\extra\animatedpicture.hpp
 	<TGUI/ClickableWidget.hpp>
 
-1432863421 source:c:\users\tyler\documents\armageddononline\mapeditor\source\sqlfunctions.cpp
+1434326554 source:c:\users\tyler\documents\armageddononline\mapeditor\source\sqlfunctions.cpp
 	"SQLFunctions.hpp"
 	"Map.hpp"
 
-1430074005 c:\users\tyler\documents\armageddononline\mapeditor\include\sqlfunctions.hpp
+1434326809 c:\users\tyler\documents\armageddononline\mapeditor\include\sqlfunctions.hpp
 	<string>
 	<iostream>
-	<sqlite3.h>
 	<memory>
 	"Cell.hpp"
 
-1434144946 c:\users\tyler\documents\armageddononline\mapeditor\include\layer.hpp
+1434318021 c:\users\tyler\documents\armageddononline\mapeditor\include\layer.hpp
 	<SFML/Graphics.hpp>
 	<memory>
 	"Tile.hpp"
 	"Settings.hpp"
 
-1434144981 source:c:\users\tyler\documents\armageddononline\mapeditor\source\layer.cpp
+1436490928 source:c:\users\tyler\documents\armageddononline\mapeditor\source\layer.cpp
 	"Layer.hpp"
 
-1433367317 c:\users\tyler\documents\armageddononline\mapeditor\include\settings.hpp
+1434326878 c:\users\tyler\documents\armageddononline\mapeditor\include\settings.hpp
 
 1433378246 c:\users\tyler\documents\armageddononline\tgui-0.7-dev\include\tgui\horizontallayout.hpp
 	<TGUI/BoxLayout.hpp>
@@ -1063,4 +1064,39 @@
 	<SFML/System/String.hpp>
 	<string>
 	<vector>
+
+1436614686 c:\users\tyler\documents\armageddononline\sqlitecpp-master\include\sqlitecpp\sqlitecpp.h
+	<SQLiteCpp/Assertion.h>
+	<SQLiteCpp/Exception.h>
+	<SQLiteCpp/Database.h>
+	<SQLiteCpp/Statement.h>
+	<SQLiteCpp/Column.h>
+	<SQLiteCpp/Transaction.h>
+
+1436614686 c:\users\tyler\documents\armageddononline\sqlitecpp-master\include\sqlitecpp\assertion.h
+	<cassert>
+
+1436614686 c:\users\tyler\documents\armageddononline\sqlitecpp-master\include\sqlitecpp\exception.h
+	<stdexcept>
+	<string>
+
+1436614686 c:\users\tyler\documents\armageddononline\sqlitecpp-master\include\sqlitecpp\database.h
+	<sqlite3.h>
+	<SQLiteCpp/Column.h>
+	<string>
+
+1436614686 c:\users\tyler\documents\armageddononline\sqlitecpp-master\include\sqlitecpp\column.h
+	<sqlite3.h>
+	<SQLiteCpp/Statement.h>
+	<SQLiteCpp/Exception.h>
+	<string>
+
+1436614686 c:\users\tyler\documents\armageddononline\sqlitecpp-master\include\sqlitecpp\statement.h
+	<sqlite3.h>
+	<string>
+	<map>
+	<SQLiteCpp/Exception.h>
+
+1436614686 c:\users\tyler\documents\armageddononline\sqlitecpp-master\include\sqlitecpp\transaction.h
+	<SQLiteCpp/Exception.h>
 

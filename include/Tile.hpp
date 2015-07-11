@@ -2,11 +2,12 @@
 #define TILE_H
 
 #include <SFML/System.hpp>
+#include <iostream>
 
 class Tile
 {
     public:
-        Tile( const sf::Vector3i position, const sf::Uint32 tileID, const sf::Uint8 alpha ) : myPosition( position ), myTileID( tileID ), myAlpha( alpha ) {};
+        Tile( sf::Vector3i position, sf::Uint32 tileID, sf::Uint8 alpha ) : myPosition( position ), myTileID( tileID ), myAlpha( alpha ) {};
         ~Tile() {};
 
         sf::Vector3i myPosition;

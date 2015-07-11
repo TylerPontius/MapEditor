@@ -17,10 +17,12 @@ class Cell : public sf::Drawable, public sf::Transformable
 {
 
 public:
-    Cell( sf::Uint32 id, sf::Vector3i position, sf::Texture* tileset, sqlite3* db );
+    Cell( sf::Uint32 id, sf::Vector3i position ) : myID( id ), myPosition( position ) {};
 
     void SetTile( sf::Vector3i position, sf::Uint32 tile, sf::Texture* tileset );
     void SetBiome( sf::Vector3i position, sf::Uint32 tile, sf::Texture* tileset );
+    void SetAir( sf::Vector3i position, sf::Uint32 air );
+    void SetRegion( sf::Vector3i position, sf::Uint32 region );
 
     sf::Uint32 GetTile( sf::Vector3i position );
     sf::Uint32 GetBiome( sf::Vector3i position );

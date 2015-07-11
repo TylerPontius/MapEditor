@@ -40,7 +40,10 @@ void Layer::SetTile( sf::Vector3i position, sf::Uint32 tile )
     if( tile == 0 ) return;
 
     // Add the tile and start computing
-    myTiles.emplace_back( position, tile, 255 );
+    Tile newTile( position, tile, 255 );
+    std::cout << position.x << " " << position.y << " " << position.z << " " << tile << "\n";
+    //myTiles.push_back(Tile( position, tile, 255 ) );
+    //myTiles.emplace_back ( position, tile, 255 );
 
     // Define its 4 corners
     quad[0].position = sf::Vector2f(x * tileSize, y * tileSize);

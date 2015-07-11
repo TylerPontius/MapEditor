@@ -50,6 +50,9 @@
 		<Unit filename="source/Map.cpp" />
 		<Unit filename="source/SQLFunctions.cpp" />
 		<Unit filename="source/main.cpp" />
+		<Unit filename="source/sqlite3.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Extensions>
 			<code_completion />
 			<envvars />
