@@ -27,7 +27,7 @@ public:
     sf::Uint32 GetTile( sf::Vector3i position );
 
 private:
-    void Clear();
+    void ClearLayer();
 
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 

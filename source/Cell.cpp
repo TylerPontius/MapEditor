@@ -1,6 +1,16 @@
 #include "Cell.hpp"
 #include <iostream>
 
+Cell::Cell( sf::Uint32 id, sf::Vector3i position ) : myID( id ), myPosition( position )
+{
+    // Set the tile info
+    setOrigin( 0.f, 0.f );
+    setPosition( position.x * tileSize * cellWidth / 2, position.y  * tileSize * cellHeight / 2 );
+    std::cout << "New cell at " << tileSize * cellWidth << ", " << tileSize * cellHeight << "\n";
+    std::cout << "  I am: " << position.x << ", " << position.y << "\n";
+};
+
+
 void Cell::SetTile( sf::Vector3i position, sf::Uint32 tile, sf::Texture* tileset )
 {
     // Make sure we have a layer for the tile
@@ -8,6 +18,7 @@ void Cell::SetTile( sf::Vector3i position, sf::Uint32 tile, sf::Texture* tileset
 
     // Set the tile
     myLayers.at( position.z ).SetTile( position, tile );
+
 };
 
 // Set a Z layer to have a biome
@@ -57,10 +68,16 @@ void Cell::draw(sf::RenderTarget& target, sf::RenderStates states) const
     z /= drawLayers;
     z *= drawLayers;
 
+    //std::cout << "drawing layers " << z << " thru " << z + drawLayers << "\n";
+
     // Draw our layers
     for( sf::Int32 i = z; i < (z + (sf::Int32)drawLayers); i++ )
+    {
+        //std::cout << "Drawing layer " << i << "\n";
         if( myLayers.find( i ) != myLayers.end() )
             target.draw( myLayers.at( i ), states );
+    }
+
 };
 
 // Create a layer if it doesn't exist
@@ -73,8 +90,10 @@ void Cell::AddLayer( sf::Vector3i position, sf::Texture* tileset )
         Layer& newLayer = myLayers.at( position.z );
 
         // Set the tile info
-        newLayer.setOrigin( 0.f, 0.f );
-        newLayer.setPosition( position.x * tileSize * cellWidth, position.y  * tileSize * cellHeight );
+        newLayer.setOrigin( getOrigin() );
+        newLayer.setPosition( getPosition() );
+
+        std::cout << "I am layer " << position.z << " at " << newLayer.getPosition().x << ", " << newLayer.getPosition().y << "\n";
     }
 };
 

@@ -17,7 +17,7 @@ class Cell : public sf::Drawable, public sf::Transformable
 {
 
 public:
-    Cell( sf::Uint32 id, sf::Vector3i position ) : myID( id ), myPosition( position ) {};
+    Cell( sf::Uint32 id, sf::Vector3i position );
 
     void SetTile( sf::Vector3i position, sf::Uint32 tile, sf::Texture* tileset );
     void SetBiome( sf::Vector3i position, sf::Uint32 tile, sf::Texture* tileset );

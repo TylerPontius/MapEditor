@@ -11,7 +11,7 @@ Layer::Layer( sf::Vector3i position, sf::Texture* tileset ) : myPosition( positi
 void Layer::SetBiome( sf::Uint32 biome )
 {
     myBiome = biome;
-    Clear();
+    ClearLayer();
 
     for( sf::Uint32 i = 0; i < cellWidth; i++ )
         for( sf::Uint32 j = 0; j < cellHeight; j++ )
@@ -26,10 +26,11 @@ void Layer::SetTile( sf::Vector3i position, sf::Uint32 tile )
                     [=] ( auto tile ) { return (tile.myPosition == position); } );
 
     // Find the relative position
-    sf::Uint32 x = position.x - myPosition.x, y = position.y - myPosition.y;
+    sf::Uint32 x = position.x ;
+    sf::Uint32 y = position.y ;
 
     // Get a pointer to the current tile's quad and delete its info
-    sf::Vertex* quad = &myVertices[( (x + y) * cellWidth) * 4];
+    sf::Vertex* quad = &myVertices[ (x + (y * cellWidth)) * 4 ];
 
     for( int i = 0; i < 4; i++ )
     {
@@ -40,10 +41,7 @@ void Layer::SetTile( sf::Vector3i position, sf::Uint32 tile )
     if( tile == 0 ) return;
 
     // Add the tile and start computing
-    Tile newTile( position, tile, 255 );
-    std::cout << position.x << " " << position.y << " " << position.z << " " << tile << "\n";
-    //myTiles.push_back(Tile( position, tile, 255 ) );
-    //myTiles.emplace_back ( position, tile, 255 );
+    myTiles.emplace_back ( position, tile, 255 );
 
     // Define its 4 corners
     quad[0].position = sf::Vector2f(x * tileSize, y * tileSize);
@@ -71,9 +69,11 @@ sf::Uint32 Layer::GetTile( sf::Vector3i position )
 }
 
 // Remove all tiles and vertices
-void Layer::Clear()
+void Layer::ClearLayer()
 {
     myVertices.clear();
+    myVertices.resize( cellWidth * cellHeight * 4 );
+
     myTiles.clear();
 };
 
@@ -86,5 +86,5 @@ void Layer::draw(sf::RenderTarget& target, sf::RenderStates states) const
     states.texture = myTileset;
 
     // draw the vertex array
-    target.draw(myVertices, states);
+    target.draw( myVertices, states);
 };

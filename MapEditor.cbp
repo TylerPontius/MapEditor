@@ -15,6 +15,11 @@
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
+				<Linker>
+					<Add library="SQLiteCpp-d" />
+					<Add library="sqlite3-d" />
+					<Add library="ssp" />
+				</Linker>
 			</Target>
 			<Target title="Release">
 				<Option output="bin/MapEditor" prefix_auto="1" extension_auto="1" />
@@ -23,9 +28,16 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Option use_console_runner="0" />
+				<Linker>
+					<Add library="SQLiteCpp" />
+					<Add library="sqlite3" />
+					<Add library="ssp" />
+				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-fno-stack-protector" />
+			<Add directory="../SQLiteCpp-master/include" />
 			<Add directory="../TGUI-0.7-dev/include" />
 			<Add directory="../SFML-2.3/include" />
 			<Add directory="include" />
@@ -37,8 +49,8 @@
 			<Add library="sfml-system" />
 			<Add directory="../SFML-2.3/lib" />
 			<Add directory="../TGUI-0.7-dev/lib" />
+			<Add directory="extlibs" />
 		</Linker>
-		<Unit filename="extlibs/sqlite3.def" />
 		<Unit filename="include/Cell.hpp" />
 		<Unit filename="include/Layer.hpp" />
 		<Unit filename="include/Map.hpp" />
@@ -50,9 +62,6 @@
 		<Unit filename="source/Map.cpp" />
 		<Unit filename="source/SQLFunctions.cpp" />
 		<Unit filename="source/main.cpp" />
-		<Unit filename="source/sqlite3.c">
-			<Option compilerVar="CC" />
-		</Unit>
 		<Extensions>
 			<code_completion />
 			<envvars />
