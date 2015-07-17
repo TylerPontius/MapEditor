@@ -29,12 +29,13 @@ const sf::Uint32 windowHeight = 768;
 const sf::Uint32 windowWidth = 1024;
 
 // How many layers to draw
-const sf::Uint32 drawLayers = 16;
+const sf::Int32 drawLayers = 16;
 
 // Current position (used for drawing)
 extern sf::Vector3i globalPosition;
 
 // Should map changes be saved?
 extern bool saveChanges;
+extern bool showFPS;
 
 #endif

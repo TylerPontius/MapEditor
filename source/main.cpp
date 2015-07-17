@@ -6,6 +6,7 @@
 #include "Map.hpp"
 
 sf::Vector3i globalPosition( 0, 0, 0 );
+bool showFPS = false;
 
 int main()
 {
@@ -319,7 +320,7 @@ int main()
         window2.draw( tileSelection );
         window2.display();
 
-        if( clock.getElapsedTime().asSeconds() > 1.0f )
+        if( clock.getElapsedTime().asSeconds() > 1.0f and showFPS )
         {
             clock.restart();
             std::cout << fps << "\n";

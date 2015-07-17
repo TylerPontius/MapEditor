@@ -6,8 +6,8 @@ Cell::Cell( sf::Uint32 id, sf::Vector3i position ) : myID( id ), myPosition( pos
     // Set the tile info
     setOrigin( 0.f, 0.f );
     setPosition( position.x * tileSize * cellWidth / 2, position.y  * tileSize * cellHeight / 2 );
-    std::cout << "New cell at " << tileSize * cellWidth << ", " << tileSize * cellHeight << "\n";
-    std::cout << "  I am: " << position.x << ", " << position.y << "\n";
+    //std::cout << "New cell at " << tileSize * cellWidth << ", " << tileSize * cellHeight << "\n";
+    //std::cout << "  I am: " << position.x << ", " << position.y << "\n";
 };
 
 
@@ -60,41 +60,40 @@ void Cell::draw(sf::RenderTarget& target, sf::RenderStates states) const
     // Make sure we don't draw other layers
     sf::Int32 z = globalPosition.z;
 
-    // If z is negative, subtract 1 to avoid drawing the wrong set of layers
-    if( z < 0 )
-        z -= drawLayers - 1;
+    // Round to the nearest layer base
+    if( z < 0 and (z % drawLayers) != 0 )
+        z = z - ( drawLayers - (-z % drawLayers) );
 
-    // Exploit integer division to round to the nearest layer base
-    z /= drawLayers;
-    z *= drawLayers;
-
-    //std::cout << "drawing layers " << z << " thru " << z + drawLayers << "\n";
+    else
+        z = z - (z % drawLayers);
 
     // Draw our layers
-    for( sf::Int32 i = z; i < (z + (sf::Int32)drawLayers); i++ )
-    {
-        //std::cout << "Drawing layer " << i << "\n";
+    for( sf::Int32 i = z; i < (z + drawLayers); i++ )
         if( myLayers.find( i ) != myLayers.end() )
             target.draw( myLayers.at( i ), states );
-    }
-
 };
 
 // Create a layer if it doesn't exist
 void Cell::AddLayer( sf::Vector3i position, sf::Texture* tileset )
 {
+    std::cout << "looking for layer " << position.z << "\n";
     if( myLayers.find( position.z ) == myLayers.end() )
     {
-        myLayers.emplace( position.z, Layer{sf::Vector3i( myPosition.x, myPosition.y, position.z ), tileset} );
-
+        std::cout << "looking to make\n";
+        myLayers.emplace(   std::piecewise_construct,
+                            std::forward_as_tuple( position.z ),
+                            std::forward_as_tuple( std::initializer_list<sf::Vector3i, sf::Texture*>( sf::Vector3i( myPosition.x, myPosition.y, position.z ), tileset ) )
+                         );
+std::cout << "made\n";
         Layer& newLayer = myLayers.at( position.z );
 
         // Set the tile info
         newLayer.setOrigin( getOrigin() );
         newLayer.setPosition( getPosition() );
 
-        std::cout << "I am layer " << position.z << " at " << newLayer.getPosition().x << ", " << newLayer.getPosition().y << "\n";
+        //std::cout << "I am layer " << position.z << " at " << newLayer.getPosition().x << ", " << newLayer.getPosition().y << "\n";
     }
+    std::cout << "done looking for layer\n\n\n";
 };
 
 void Cell::RemoveLayer( sf::Vector3i position )
