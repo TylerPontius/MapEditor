@@ -33,6 +33,7 @@ public:
 private:
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
+    bool LayerExists( sf::Vector3i position );
     void AddLayer( sf::Vector3i position, sf::Texture* tileset );
     void RemoveLayer( sf::Vector3i position );
 
@@ -42,7 +43,8 @@ private:
     // Map of all Z layers
     // The first half represents Z level,
     // the second half represents data about that layer
-    std::map< sf::Int32, Layer > myLayers;
+    typedef std::unique_ptr<Layer> LayerPtr;
+    std::map< sf::Int32, LayerPtr > myLayers;
 };
 
 #endif

@@ -113,8 +113,6 @@ int main()
                 // Snap to grid
                 selectPosition.x -= selectPosition.x % tileSize;
                 selectPosition.y -= selectPosition.y % tileSize;
-
-                std::cout << selectPosition.x << " " << selectPosition.y << "\n";
             }
 
             if( event.type == sf::Event::KeyPressed )

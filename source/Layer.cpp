@@ -2,7 +2,6 @@
 
 Layer::Layer( sf::Vector3i position, sf::Texture* tileset ) : myPosition( position ), myTileset( tileset )
 {
-    std::cout << "I am layer " << position.z << " at " << myPosition.x << ", " << myPosition.y << "\n";
     // Resize the vertex array to fit the cell size
     myVertices.setPrimitiveType( sf::Quads );
     myVertices.resize( cellWidth * cellHeight * 4 );

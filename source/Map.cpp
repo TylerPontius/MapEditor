@@ -30,17 +30,13 @@ void Map::SetTile( sf::Vector3i position, sf::Uint32 tile )
     // Find the cell the tile is in
     sf::Vector3i cellPos = position;
     ConvertToCellPosition( cellPos );
-    std::cout << "Looking for cell at " << cellPos.x << ", " << cellPos.y << ", " << cellPos.z << "\n";
-
 
     // Make sure it exists!
     if( CellExists( cellPos ) )
     {
         ConvertToTilePosition( position );
         GetCell( cellPos ).SetTile( position, tile, tileset );
-        std::cout << "Setting tile " << tile << " at " << position.x << ", " << position.y << ", " << position.z << "\n";
     }
-
 };
 
 void Map::SetBiome( sf::Vector3i position, sf::Uint32 tile )
@@ -208,6 +204,31 @@ void Map::LoadCell( sf::Vector3i position )
                 newCell.SetBiome ( layerPos, biome, tileset );
                 newCell.SetAir   ( layerPos, air );
                 newCell.SetRegion( layerPos, region );
+            }
+        }
+        catch (std::exception& e)
+        {
+            std::cout << "exception: " << e.what() << std::endl;
+        }
+
+        try
+        {
+            // Make a SQL query
+            SQLite::Statement query( db, "SELECT X, Y, Z, Tile, Alpha FROM Tiles WHERE Cell = ?" );
+
+            // Bind our request
+            query.bind( 1, (int)cellID );
+
+            while( query.executeStep() )
+            {
+                // Everything is good to go! Make a new layer
+                sf::Vector3i tilePos;
+                tilePos.x       = query.getColumn( 0 ).getInt();
+                tilePos.y       = query.getColumn( 1 ).getInt();
+                tilePos.z       = query.getColumn( 2 ).getInt();
+                sf::Uint32 tile = query.getColumn( 3 ).getInt();
+
+                newCell.SetTile( tilePos, tile, tileset );
             }
         }
         catch (std::exception& e)
@@ -527,6 +548,8 @@ void Map::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 Cell& Map::GetCell( sf::Vector3i position )
 {
+    position.z = 0;
+
     for( auto& it : myCells )
         if( it.second.GetPosition() == position )
             return it.second;
