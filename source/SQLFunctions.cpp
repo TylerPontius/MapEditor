@@ -11,10 +11,10 @@ SQLFunctions::SQLFunctions()
     }
 };
 
-std::shared_ptr<Cell> SQLFunctions::LoadCell( sf::Uint32 id )
+Cell* SQLFunctions::LoadCell( sf::Vector3i position )
 {
     // Make a SQL query
-    std::string query = "SELECT X, Y, Air, Region FROM Cells WHERE ID = ?";
+    std::string query = "SELECT ID FROM Cells WHERE X = ? AND Y = ?";
     sqlite3_stmt *statement;
 
     int err = sqlite3_prepare_v2( db, query.c_str(), -1, &statement, NULL );
@@ -25,7 +25,8 @@ std::shared_ptr<Cell> SQLFunctions::LoadCell( sf::Uint32 id )
     }
 
     // Bind our request
-    err = sqlite3_bind_int( statement, 1, id );
+    err = sqlite3_bind_int( statement, 1, position.x );
+    err = sqlite3_bind_int( statement, 2, position.y );
     if( err != SQLITE_OK )
     {
         std::cout << "Bind failed! " << err << " " << sqlite3_errmsg( db ) << std::endl;
@@ -41,20 +42,15 @@ std::shared_ptr<Cell> SQLFunctions::LoadCell( sf::Uint32 id )
     }
 
     // Grab our value
-    sf::Uint32 ret[5];
-    for( int i = 0; i < 4; i++ )
-        ret[i] = sqlite3_column_int( statement, i );
+    sf::Uint32 id = sqlite3_column_int( statement, 0 );
 
     sqlite3_finalize( statement );
 
-    sf::Vector3i pos;
-
-
-    return std::make_shared<Cell>( id, ret[0], ret[1], ret[2], ret[3] ) );
+    return new Cell( id, position );
 };
 
 
-std::vector< std::shared_ptr<Tile> > SQLFunctions::LoadTileLayer( sf::Uint32 cell, sf::Int32 z )
+SQLFunctions::LoadLayers( sf::Uint32 cell, sf::Int32 z )
 {
     std::vector< std::shared_ptr<Tile> > tiles;
 
@@ -163,6 +159,30 @@ std::map< sf::Uint32, sf::Uint32 > SQLFunctions::LoadBiomes( sf::Uint32 id )
     sqlite3_finalize( statement );
 
     return biomes;
+};
+
+sf::Uint32 SQLFunctions::GetMaxCellID()
+{
+    sf::Uint32 maxCellID = 0;
+    // Make a SQL query
+    sqlite3_stmt *statement;
+    std::string query = "SELECT MAX(ID) FROM Cells";
+
+    int err = sqlite3_prepare_v2( db, query.c_str(), -1, &statement, NULL );
+    if( err != SQLITE_OK )
+    {
+        std::cout << "Query failed! " << err << " " << sqlite3_errmsg( db ) << std::endl;
+        return 0;
+    }
+
+    // Grab the ID
+    err = sqlite3_step( statement );
+    if( err == SQLITE_ROW )
+        maxCellID = sqlite3_column_int( statement, 0 );
+    else
+        std::cout << "Error grabbing max cell ID." << std::endl;
+
+    return maxCellID;
 };
 
 SQLFunctions::~SQLFunctions()
