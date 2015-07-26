@@ -49,3 +49,6 @@ Temporary Items
 *.c
 *.h
 obj/*
+*.depend
+MapEditor.depend
+*.depend
