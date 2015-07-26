@@ -2,17 +2,22 @@
 #define LAYER_H
 
 #include <SFML/Graphics.hpp>
+#include <SQLiteCpp/SQLiteCpp.h>
 #include <memory>
 #include "Tile.hpp"
 #include "Settings.hpp"
 
 // Layer contains a VertexArray which holds the graphics for a cell
-
 class Layer : public sf::Drawable, public sf::Transformable
 {
+    friend class Map;
+
 public:
 
-    Layer( sf::Vector3i position, sf::Texture* tileset );
+    Layer( sf::Uint32 cell, sf::Vector3i position, sf::Texture* tileset );
+
+    void Save();
+    void Load();
 
     void SetBiome( sf::Uint32 biome );
     void SetRegion( sf::Uint32 region ) { myRegion = region; };
@@ -37,6 +42,7 @@ private:
     sf::Vector3i myPosition;
     sf::Texture* myTileset;
 
+    sf::Uint32 myCell;
     sf::Uint32 myBiome = 0, myRegion = 0, myAir = 0;
 
 };

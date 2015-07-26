@@ -4,7 +4,6 @@
 #include <memory>
 #include <map>
 #include <string>
-#include <sqlite3.h>
 #include "Layer.hpp"
 
 // A cell is a portion of the map.
@@ -15,17 +14,22 @@
 
 class Cell : public sf::Drawable, public sf::Transformable
 {
+    friend class Map;
 
 public:
     Cell( sf::Uint32 id, sf::Vector3i position );
+
+    void Save();
+    void Load();
 
     void SetTile( sf::Vector3i position, sf::Uint32 tile, sf::Texture* tileset );
     void SetBiome( sf::Vector3i position, sf::Uint32 tile, sf::Texture* tileset );
     void SetAir( sf::Vector3i position, sf::Uint32 air );
     void SetRegion( sf::Vector3i position, sf::Uint32 region );
 
-    sf::Uint32 GetTile( sf::Vector3i position );
-    sf::Uint32 GetBiome( sf::Vector3i position );
+    sf::Uint32 GetTile  ( sf::Vector3i position );
+    sf::Uint32 GetBiome ( sf::Vector3i position );
+    sf::Uint32 GetRegion( sf::Vector3i position );
 
     sf::Uint32 GetID() { return myID; };
     sf::Vector3i GetPosition() { return myPosition; };

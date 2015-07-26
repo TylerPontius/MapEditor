@@ -5,16 +5,19 @@
 
 #include "Map.hpp"
 
-sf::Vector3i globalPosition( 0, 0, 0 );
-bool showFPS = false;
+sf::Vector3i Settings::globalPosition( 0, 0, 0 );
+bool Settings::showFPS = false;
+bool Settings::saveChanges = false;
 
 int main()
 {
+    using namespace Settings;
+
     // Create the window
     std::string windowTitle = "Map Editor ";
     windowTitle.append( version );
     sf::RenderWindow window( sf::VideoMode( windowWidth, windowHeight ), windowTitle );
-    //window.setFramerateLimit( 60 );
+    window.setFramerateLimit( 60 );
 
     tgui::Gui gui( window );
     auto labelZPos = tgui::Label::create( "widgets/Black.conf" );
@@ -95,13 +98,18 @@ int main()
     sf::Clock clock;
     int fps = 0;
 
+    sf::Vector3i previousSelection;
+    std::string region, regionSubtitle;
+
     while( window.isOpen() )
     {
+        previousSelection = selectPosition;
+
         // Check all the window's events that were triggered since the last iteration of the loop
         sf::Event event;
         while( window.pollEvent(event) )
         {
-            // Mouse moved
+            // Mouse clicked
             if( event.type == sf::Event::MouseButtonPressed )
             {
                 // Get the current mouse position in world coords
@@ -294,7 +302,17 @@ int main()
             std::stringstream ss;
             if( saveChanges ) ss << "Saving on, ";
             else ss << "Saving off, ";
+
             ss << "Z = " << selectPosition.z;
+
+            if( previousSelection != selectPosition )
+            {
+                region         = worldMap.GetRegion( selectPosition, false );
+                regionSubtitle = worldMap.GetRegion( selectPosition, true  );
+            }
+
+            ss << "   Region = " << region << ", " << regionSubtitle;
+
             labelZPos->setText( ss.str() );
         }
 
