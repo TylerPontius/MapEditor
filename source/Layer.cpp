@@ -8,6 +8,11 @@ Layer::Layer( sf::Uint32 cell, sf::Vector3i position, sf::Texture* tileset ) : m
     myVertices.resize( Settings::cellWidth * Settings::cellHeight * 4 );
 };
 
+Layer::~Layer()
+{
+    if( Settings::saveChanges ) Save();
+};
+
 void Layer::Save()
 {
     // Create the layer entry if it doesn't already exist
@@ -157,7 +162,7 @@ void Layer::Load()
 // Set every tile in the cell to the biome
 void Layer::SetBiome( sf::Uint32 biome )
 {
-    ClearLayer();
+    Clear();
 
     myBiome = biome;
 
@@ -222,7 +227,7 @@ sf::Uint32 Layer::GetTile( sf::Vector3i position )
 }
 
 // Remove all tiles and vertices
-void Layer::ClearLayer()
+void Layer::Clear()
 {
     myTiles.clear();
     myVertices.clear();

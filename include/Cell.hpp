@@ -18,6 +18,7 @@ class Cell : public sf::Drawable, public sf::Transformable
 
 public:
     Cell( sf::Uint32 id, sf::Vector3i position );
+    ~Cell();
 
     void Save();
     void Load();

@@ -15,6 +15,7 @@ class Layer : public sf::Drawable, public sf::Transformable
 public:
 
     Layer( sf::Uint32 cell, sf::Vector3i position, sf::Texture* tileset );
+    ~Layer();
 
     void Save();
     void Load();
@@ -32,17 +33,17 @@ public:
     sf::Uint32 GetTile( sf::Vector3i position );
 
 private:
-    void ClearLayer();
+    void Clear();
 
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
     sf::VertexArray myVertices;
     std::vector<Tile> myTiles;
 
+    sf::Uint32 myCell;
     sf::Vector3i myPosition;
     sf::Texture* myTileset;
 
-    sf::Uint32 myCell;
     sf::Uint32 myBiome = 0, myRegion = 0, myAir = 0;
 
 };

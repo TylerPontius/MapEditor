@@ -34,14 +34,13 @@ std::string Map::GetRegion( sf::Vector3i position, bool subtitle )
     // Make sure it exists!
     if( CellExists( cellPos ) )
     {
-
         try
         {
             // Make a SQL query
             SQLite::Statement query( db, "SELECT Name, Subtitle FROM Regions WHERE ID = ?" );
 
             // Bind our request
-            query.bind( 1, (int)GetCell( cellPos ).GetRegion( tilePos ) );
+            query.bind( 1, int(myCells.at( GetCellID( cellPos ) )->GetRegion( tilePos )) );
 
             while( query.executeStep() )
             {
@@ -73,7 +72,7 @@ void Map::SetTile( sf::Vector3i position, sf::Uint32 tile )
 
     // Make sure it exists!
     if( CellExists( cellPos ) )
-        GetCell( cellPos ).SetTile( tilePos, tile, tileset );
+        myCells.at( GetCellID( cellPos ) )->SetTile( tilePos, tile, tileset );
 };
 
 void Map::SetBiome( sf::Vector3i position, sf::Uint32 tile )
@@ -83,7 +82,7 @@ void Map::SetBiome( sf::Vector3i position, sf::Uint32 tile )
 
     // Make sure it exists!
     if( CellExists( cellPos ) )
-        GetCell( cellPos ).SetBiome( tilePos, tile, tileset );
+        myCells.at( GetCellID( cellPos ) )->SetBiome( tilePos, tile, tileset );
 };
 
 // Make sure we have all the proper areas loaded
@@ -152,11 +151,9 @@ void Map::UpdateLoadedCells( sf::Vector3i position )
 
     // Loop through the rows
     for( auto& it : cellsNeeded )
-    {
         // Cell not found in the map, load it!
         if( !CellExists( it ) )
             LoadCell( it );
-    }
 
     // Clean up any unused cells
     // If it's already loaded, do we still need it?
@@ -166,11 +163,11 @@ void Map::UpdateLoadedCells( sf::Vector3i position )
         bool isNeeded = false;
 
         for( auto& it2 : cellsNeeded )
-            if( it.second.GetPosition() == it2 )
+            if( it.second->GetPosition() == it2 )
                 isNeeded = true;
 
         if( !isNeeded )
-            toRemove.push_back( it.second.GetID() );
+            toRemove.push_back( it.second->GetID() );
     }
 
 
@@ -219,20 +216,11 @@ void Map::LoadCell( sf::Vector3i position )
     }
 
     // Add the cell to the map
-    Cell& newCell = CreateCell( position, cellID );
+    myCells.insert( std::pair<sf::Uint32, CellPtr>( cellID, std::make_unique<Cell>( cellID, position ) ) );
+    assert( myCells.find(cellID) != myCells.end() );
 
-    // Load the cell layers from the database
-    if( toLoadCell )
-        newCell.Load();
+    if( toLoadCell ) myCells.at( cellID )->Load();
 }
-
-Cell& Map::CreateCell( sf::Vector3i position, sf::Uint32 cellID )
-{
-    myCells.emplace( cellID, Cell{ cellID, position } );
-
-    Cell& cell = GetCell( position );
-    return cell;
-};
 
 
 // Save a cell to the database
@@ -240,40 +228,19 @@ void Map::RemoveCell( sf::Uint32 cellID )
 {
     if( !CellExists( cellID ) or Settings::saveChanges == false ) return;
 
-    GetCell( cellID ).Save();
+    myCells.at( cellID )->Save();
 };
 
 
 void Map::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
     for( auto& it : myCells )
-        target.draw( it.second, states );
-};
-
-Cell& Map::GetCell( sf::Vector3i position )
-{
-    position.z = 0;
-
-    for( auto& it : myCells )
-        if( it.second.GetPosition() == position )
-            return it.second;
-};
-
-Cell& Map::GetCell( sf::Uint32 cellID )
-{
-    return myCells.at( cellID );
+        target.draw( *(it.second), states );
 };
 
 bool Map::CellExists( sf::Vector3i position )
 {
-    // We don't care about z when looking up cells
-    position.z = 0;
-
-    for( auto& it : myCells )
-        if( it.second.GetPosition() == position )
-            return true;
-
-    return false;
+    return GetCellID( position ) == 0 ? false : true;
 };
 
 bool Map::CellExists( sf::Uint32 cellID )
@@ -283,6 +250,18 @@ bool Map::CellExists( sf::Uint32 cellID )
 
     return true;
 };
+
+sf::Uint32 Map::GetCellID( sf::Vector3i position )
+{
+    // We don't care about z when looking up cells
+    position.z = 0;
+
+    for( auto& it : myCells )
+        if( it.second->GetPosition() == position )
+            return it.second->GetID();
+
+    return 0;
+}
 
 // Convert a world position to a cell position
 sf::Vector3i Map::ConvertToCellPosition( sf::Vector3i position )
