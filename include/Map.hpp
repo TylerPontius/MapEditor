@@ -27,12 +27,9 @@ public:
 
  private:
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
-
-    Cell& CreateCell( sf::Vector3i position, sf::Uint32 cellID );
     void LoadCell( sf::Vector3i position );
 
-    Cell& GetCell( sf::Vector3i position );
-    Cell& GetCell( sf::Uint32 cellID );
+    sf::Uint32 GetCellID( sf::Vector3i position );
 
     bool CellExists( sf::Vector3i position );
     bool CellExists( sf::Uint32 cellID );
@@ -43,7 +40,9 @@ public:
     sf::Vector3i ConvertToTilePosition( sf::Vector3i position );
 
     sf::Uint32 maxCellID;
-    std::map< sf::Uint32, Cell > myCells;
+
+    typedef std::unique_ptr<Cell> CellPtr;
+    std::map< sf::Uint32, CellPtr > myCells;
 
 };
 

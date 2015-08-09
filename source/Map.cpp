@@ -83,6 +83,8 @@ void Map::SetBiome( sf::Vector3i position, sf::Uint32 tile )
     // Make sure it exists!
     if( CellExists( cellPos ) )
         myCells.at( GetCellID( cellPos ) )->SetBiome( tilePos, tile, tileset );
+    else
+        std::cout << "no cell\n";
 };
 
 // Make sure we have all the proper areas loaded
@@ -113,16 +115,16 @@ void Map::UpdateLoadedCells( sf::Vector3i position )
     // Check horizontal bounds
     if( int(centerCell.x - (horizCellsNeeded/2)) < 0  )
         currentCell.x = 0;
-    else if( centerCell.x + (horizCellsNeeded/2) > (mapWidth / cellWidth) )
-        currentCell.x = (mapWidth / cellWidth) - horizCellsNeeded;
+    else if( centerCell.x + (horizCellsNeeded/2) > mapWidth )
+        currentCell.x = mapWidth - horizCellsNeeded;
     else
         currentCell.x = centerCell.x - (horizCellsNeeded/2);
 
     // Check vertical bounds
     if( int(centerCell.y - (vertiCellsNeeded/2)) < 0  )
         currentCell.y = 0;
-    else if( centerCell.y + (vertiCellsNeeded/2) > (mapWidth / cellHeight) )
-        currentCell.y = (mapWidth / cellHeight) - vertiCellsNeeded;
+    else if( centerCell.y + (vertiCellsNeeded/2) > mapWidth )
+        currentCell.y = mapWidth - vertiCellsNeeded;
     else
         currentCell.y = centerCell.y - (vertiCellsNeeded/2);
 

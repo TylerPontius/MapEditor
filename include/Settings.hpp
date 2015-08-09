@@ -24,7 +24,7 @@ namespace Settings
     const sf::Uint32 mapHeight = 1000;
 
     // Number of cells to buffer around screen
-    const sf::Uint32 mapBuffer = 4;
+    const sf::Uint32 mapBuffer = 9;
 
     // Window size in pixels
     const sf::Uint32 windowHeight = 768;
