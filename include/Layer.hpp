@@ -14,36 +14,37 @@ class Layer : public sf::Drawable, public sf::Transformable
 
 public:
 
-    Layer( sf::Uint32 cell, sf::Vector3i position, sf::Texture* tileset );
+    Layer( sf::Int32 cell, sf::Vector3i position, sf::Texture* tileset );
+    ~Layer();
 
     void Save();
     void Load();
 
-    void SetBiome( sf::Uint32 biome );
-    void SetRegion( sf::Uint32 region ) { myRegion = region; };
-    void SetAir( sf::Uint32 air ) { myAir = air; };
+    void SetBiome( sf::Int32 biome );
+    void SetRegion( sf::Int32 region ) { myRegion = region; };
+    void SetAir( sf::Int32 air ) { myAir = air; };
 
-    void SetTile( sf::Vector3i position, sf::Uint32 tile );
+    void SetTile( sf::Vector3i position, sf::Int32 tile );
 
-    sf::Uint32 GetBiome()  { return myBiome;  };
-    sf::Uint32 GetRegion() { return myRegion; };
-    sf::Uint32 GetAir()    { return myAir;    };
+    sf::Int32 GetBiome()  { return myBiome;  };
+    sf::Int32 GetRegion() { return myRegion; };
+    sf::Int32 GetAir()    { return myAir;    };
 
-    sf::Uint32 GetTile( sf::Vector3i position );
+    sf::Int32 GetTile( sf::Vector3i position );
 
 private:
-    void ClearLayer();
+    void Clear();
 
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
     sf::VertexArray myVertices;
     std::vector<Tile> myTiles;
 
+    sf::Int32 myCell;
     sf::Vector3i myPosition;
     sf::Texture* myTileset;
 
-    sf::Uint32 myCell;
-    sf::Uint32 myBiome = 0, myRegion = 0, myAir = 0;
+    sf::Int32 myBiome = 0, myRegion = 0, myAir = 0;
 
 };
 

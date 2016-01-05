@@ -23,6 +23,39 @@ Map::Map()
     {
         std::cout << "exception: " << e.what() << std::endl;
     }
+
+    // Load the textures
+    std::map<sf::Int32, std::string> tilesets;
+    try
+    {
+        // Make a SQL query
+        SQLite::Statement query( db, "SELECT ID, FileName FROM Tilesets" );
+
+        while( query.executeStep() )
+            tilesets.emplace( query.getColumn(0).getInt(), query.getColumn(1).getText() );
+
+    }
+    catch (std::exception& e)
+    {
+        std::cout << "exception: " << e.what() << std::endl;
+    }
+
+
+
+    try
+    {
+        for( auto it : tilesets )
+        {
+            textures.acquire( it.first, thor::Resources::fromFile<sf::Texture>(it.second) );
+            std::cout << "Loaded tileset " << it.first << ": " << it.second << "\n";
+        }
+
+    }
+    catch (thor::ResourceLoadingException& e)
+    {
+       std::cout << "Error: " << e.what() << std::endl;
+    }
+
 };
 
 
@@ -34,14 +67,13 @@ std::string Map::GetRegion( sf::Vector3i position, bool subtitle )
     // Make sure it exists!
     if( CellExists( cellPos ) )
     {
-
         try
         {
             // Make a SQL query
             SQLite::Statement query( db, "SELECT Name, Subtitle FROM Regions WHERE ID = ?" );
 
             // Bind our request
-            query.bind( 1, (int)GetCell( cellPos ).GetRegion( tilePos ) );
+            query.bind( 1, int(myCells.at( GetCellID( cellPos ) )->GetRegion( tilePos )) );
 
             while( query.executeStep() )
             {
@@ -66,24 +98,26 @@ std::string Map::GetRegion( sf::Vector3i position, bool subtitle )
 };
 
 // Set a particular tile
-void Map::SetTile( sf::Vector3i position, sf::Uint32 tile )
+void Map::SetTile( sf::Vector3i position, sf::Int32 tile )
 {
     sf::Vector3i cellPos = ConvertToCellPosition( position );
     sf::Vector3i tilePos = ConvertToTilePosition( position );
 
     // Make sure it exists!
     if( CellExists( cellPos ) )
-        GetCell( cellPos ).SetTile( tilePos, tile, tileset );
+        myCells.at( GetCellID( cellPos ) )->SetTile( tilePos, tile, tileset );
 };
 
-void Map::SetBiome( sf::Vector3i position, sf::Uint32 tile )
+void Map::SetBiome( sf::Vector3i position, sf::Int32 tile )
 {
     sf::Vector3i cellPos = ConvertToCellPosition( position );
     sf::Vector3i tilePos = ConvertToTilePosition( position );
 
     // Make sure it exists!
     if( CellExists( cellPos ) )
-        GetCell( cellPos ).SetBiome( tilePos, tile, tileset );
+        myCells.at( GetCellID( cellPos ) )->SetBiome( tilePos, tile, tileset );
+    else
+        std::cout << "no cell\n";
 };
 
 // Make sure we have all the proper areas loaded
@@ -98,8 +132,8 @@ void Map::UpdateLoadedCells( sf::Vector3i position )
 
     // How many cells do we need loaded?
     // This is equal to the number of cells visible plus a buffer
-    sf::Uint32 horizCellsNeeded = ceil( windowWidth  / ( cellWidth  * tileSize )) + mapBuffer;
-    sf::Uint32 vertiCellsNeeded = ceil( windowHeight / ( cellHeight * tileSize )) + mapBuffer;
+    sf::Int32 horizCellsNeeded = ceil( windowWidth  / ( cellWidth  * tileSize )) + mapBuffer;
+    sf::Int32 vertiCellsNeeded = ceil( windowHeight / ( cellHeight * tileSize )) + mapBuffer;
 
     // Make sure the numbers are even to make things nice
     if( horizCellsNeeded % 2 != 0 ) horizCellsNeeded++;
@@ -114,16 +148,16 @@ void Map::UpdateLoadedCells( sf::Vector3i position )
     // Check horizontal bounds
     if( int(centerCell.x - (horizCellsNeeded/2)) < 0  )
         currentCell.x = 0;
-    else if( centerCell.x + (horizCellsNeeded/2) > (mapWidth / cellWidth) )
-        currentCell.x = (mapWidth / cellWidth) - horizCellsNeeded;
+    else if( centerCell.x + (horizCellsNeeded/2) > mapWidth )
+        currentCell.x = mapWidth - horizCellsNeeded;
     else
         currentCell.x = centerCell.x - (horizCellsNeeded/2);
 
     // Check vertical bounds
     if( int(centerCell.y - (vertiCellsNeeded/2)) < 0  )
         currentCell.y = 0;
-    else if( centerCell.y + (vertiCellsNeeded/2) > (mapWidth / cellHeight) )
-        currentCell.y = (mapWidth / cellHeight) - vertiCellsNeeded;
+    else if( centerCell.y + (vertiCellsNeeded/2) > mapWidth )
+        currentCell.y = mapWidth - vertiCellsNeeded;
     else
         currentCell.y = centerCell.y - (vertiCellsNeeded/2);
 
@@ -134,10 +168,10 @@ void Map::UpdateLoadedCells( sf::Vector3i position )
     std::vector< sf::Vector3i > cellsNeeded;
 
     // Loop through the rows
-    for( sf::Uint32 i = 0; i < vertiCellsNeeded; i++ )
+    for( sf::Int32 i = 0; i < vertiCellsNeeded; i++ )
     {
         // Loop through the columns
-        for( sf::Uint32 j = 0; j < horizCellsNeeded; j++ )
+        for( sf::Int32 j = 0; j < horizCellsNeeded; j++ )
         {
             cellsNeeded.push_back( currentCell );
             currentCell.x++;
@@ -152,25 +186,23 @@ void Map::UpdateLoadedCells( sf::Vector3i position )
 
     // Loop through the rows
     for( auto& it : cellsNeeded )
-    {
         // Cell not found in the map, load it!
         if( !CellExists( it ) )
             LoadCell( it );
-    }
 
     // Clean up any unused cells
     // If it's already loaded, do we still need it?
-    std::vector< sf::Uint32 > toRemove;
+    std::vector< sf::Int32 > toRemove;
     for( auto& it : myCells )
     {
         bool isNeeded = false;
 
         for( auto& it2 : cellsNeeded )
-            if( it.second.GetPosition() == it2 )
+            if( it.second->GetPosition() == it2 )
                 isNeeded = true;
 
         if( !isNeeded )
-            toRemove.push_back( it.second.GetID() );
+            toRemove.push_back( it.second->GetID() );
     }
 
 
@@ -189,7 +221,7 @@ void Map::LoadCell( sf::Vector3i position )
     if( CellExists( position ) )
         return;
 
-    sf::Uint32 cellID;
+    sf::Int32 cellID;
     bool toLoadCell = false;
 
     try
@@ -219,70 +251,52 @@ void Map::LoadCell( sf::Vector3i position )
     }
 
     // Add the cell to the map
-    Cell& newCell = CreateCell( position, cellID );
+    myCells.insert( std::pair<sf::Int32, CellPtr>( cellID, std::make_unique<Cell>( cellID, position ) ) );
+    assert( myCells.find(cellID) != myCells.end() );
 
-    // Load the cell layers from the database
-    if( toLoadCell )
-        newCell.Load();
+    if( toLoadCell ) myCells.at( cellID )->Load();
 }
-
-Cell& Map::CreateCell( sf::Vector3i position, sf::Uint32 cellID )
-{
-    myCells.emplace( cellID, Cell{ cellID, position } );
-
-    Cell& cell = GetCell( position );
-    return cell;
-};
 
 
 // Save a cell to the database
-void Map::RemoveCell( sf::Uint32 cellID )
+void Map::RemoveCell( sf::Int32 cellID )
 {
     if( !CellExists( cellID ) or Settings::saveChanges == false ) return;
 
-    GetCell( cellID ).Save();
+    myCells.at( cellID )->Save();
 };
 
 
 void Map::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
     for( auto& it : myCells )
-        target.draw( it.second, states );
-};
-
-Cell& Map::GetCell( sf::Vector3i position )
-{
-    position.z = 0;
-
-    for( auto& it : myCells )
-        if( it.second.GetPosition() == position )
-            return it.second;
-};
-
-Cell& Map::GetCell( sf::Uint32 cellID )
-{
-    return myCells.at( cellID );
+        target.draw( *(it.second), states );
 };
 
 bool Map::CellExists( sf::Vector3i position )
 {
-    // We don't care about z when looking up cells
-    position.z = 0;
-
-    for( auto& it : myCells )
-        if( it.second.GetPosition() == position )
-            return true;
-
-    return false;
+    return GetCellID( position ) == 0 ? false : true;
 };
 
-bool Map::CellExists( sf::Uint32 cellID )
+bool Map::CellExists( sf::Int32 cellID )
 {
     if( myCells.find( cellID ) == myCells.end() )
         return false;
 
     return true;
 };
+
+sf::Int32 Map::GetCellID( sf::Vector3i position )
+{
+    // We don't care about z when looking up cells
+    position.z = 0;
+
+    for( auto& it : myCells )
+        if( it.second->GetPosition() == position )
+            return it.second->GetID();
+
+    return 0;
+}
 
 // Convert a world position to a cell position
 sf::Vector3i Map::ConvertToCellPosition( sf::Vector3i position )

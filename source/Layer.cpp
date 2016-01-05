@@ -1,11 +1,16 @@
 #include "Layer.hpp"
 #include "Map.hpp"
 
-Layer::Layer( sf::Uint32 cell, sf::Vector3i position, sf::Texture* tileset ) : myCell( cell ), myPosition( position ), myTileset( tileset )
+Layer::Layer( sf::Int32 cell, sf::Vector3i position, sf::Texture* tileset ) : myCell( cell ), myPosition( position ), myTileset( tileset )
 {
     // Resize the vertex array to fit the cell size
     myVertices.setPrimitiveType( sf::Quads );
     myVertices.resize( Settings::cellWidth * Settings::cellHeight * 4 );
+};
+
+Layer::~Layer()
+{
+    if( Settings::saveChanges ) Save();
 };
 
 void Layer::Save()
@@ -143,7 +148,7 @@ void Layer::Load()
             tilePos.x       = query.getColumn( 0 ).getInt();
             tilePos.y       = query.getColumn( 1 ).getInt();
             tilePos.z       = myPosition.z;
-            sf::Uint32 tile = query.getColumn( 2 ).getInt();
+            sf::Int32 tile = query.getColumn( 2 ).getInt();
 
             SetTile( tilePos, tile );
         }
@@ -155,19 +160,19 @@ void Layer::Load()
 };
 
 // Set every tile in the cell to the biome
-void Layer::SetBiome( sf::Uint32 biome )
+void Layer::SetBiome( sf::Int32 biome )
 {
-    ClearLayer();
+    Clear();
 
     myBiome = biome;
 
-    for( sf::Uint32 i = 0; i < Settings::cellWidth; i++ )
-        for( sf::Uint32 j = 0; j < Settings::cellHeight; j++ )
+    for( sf::Int32 i = 0; i < Settings::cellWidth; i++ )
+        for( sf::Int32 j = 0; j < Settings::cellHeight; j++ )
             SetTile( sf::Vector3i( i, j, myPosition.z ), biome );
 }
 
 // Add a tile to the layer
-void Layer::SetTile( sf::Vector3i position, sf::Uint32 tile )
+void Layer::SetTile( sf::Vector3i position, sf::Int32 tile )
 {
     using namespace Settings;
 
@@ -178,8 +183,8 @@ void Layer::SetTile( sf::Vector3i position, sf::Uint32 tile )
                     myTiles.end() );
 
     // Find the relative position
-    sf::Uint32 x = position.x ;
-    sf::Uint32 y = position.y ;
+    sf::Int32 x = position.x ;
+    sf::Int32 y = position.y ;
 
     // Get a pointer to the current tile's quad and delete its info
     sf::Vertex* quad = &myVertices[ (x + (y * cellWidth)) * 4 ];
@@ -212,7 +217,7 @@ void Layer::SetTile( sf::Vector3i position, sf::Uint32 tile )
     quad[3].texCoords = sf::Vector2f(tu * tileSize, (tv + 1) * tileSize);
 };
 
-sf::Uint32 Layer::GetTile( sf::Vector3i position )
+sf::Int32 Layer::GetTile( sf::Vector3i position )
 {
     for( auto& tile : myTiles )
         if( tile.myPosition == position )
@@ -222,7 +227,7 @@ sf::Uint32 Layer::GetTile( sf::Vector3i position )
 }
 
 // Remove all tiles and vertices
-void Layer::ClearLayer()
+void Layer::Clear()
 {
     myTiles.clear();
     myVertices.clear();

@@ -36,13 +36,15 @@
 			</Target>
 		</Build>
 		<Compiler>
-			<Add option="-fno-stack-protector" />
 			<Add directory="../SQLiteCpp-master/include" />
+			<Add directory="../thor-v2.0-sdk/include" />
 			<Add directory="../TGUI-0.7-dev/include" />
 			<Add directory="../SFML-2.3/include" />
 			<Add directory="include" />
+			<Add directory="../thor-v2.0-sdk/extlibs/aurora/include" />
 		</Compiler>
 		<Linker>
+			<Add library="thor" />
 			<Add library="tgui" />
 			<Add library="sfml-graphics" />
 			<Add library="sfml-window" />

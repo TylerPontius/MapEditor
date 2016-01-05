@@ -65,7 +65,7 @@ int main()
     tileSelection.setOutlineColor( sf::Color::Red );
     tileSelection.setOutlineThickness( 2.f );
 
-    sf::Uint32 currentTile = 0;
+    sf::Int32 currentTile = 0;
 
     // Create the view
     sf::View view( sf::Vector2f( windowWidth / 2, windowHeight / 2 ), sf::Vector2f( windowWidth, windowHeight ) );
@@ -78,13 +78,19 @@ int main()
     sf::RectangleShape selection( sf::Vector2f( tileSize, tileSize ) );
     selection.setFillColor( sf::Color::Transparent );
     selection.setOutlineColor( sf::Color::Red );
-    selection.setOutlineThickness( 2.5 );
+    selection.setOutlineThickness( 3.f );
 
     // Make the cell selector rectangle
     sf::RectangleShape selectionCell( sf::Vector2f( tileSize * cellWidth, tileSize * cellHeight ) );
     selectionCell.setFillColor( sf::Color::Transparent );
     selectionCell.setOutlineColor( sf::Color::Magenta );
-    selectionCell.setOutlineThickness( 5.f );
+    selectionCell.setOutlineThickness( 15.f );
+
+    // Make the cell selector rectangle
+    sf::RectangleShape mapBorder( sf::Vector2f( mapWidth * tileSize * cellWidth, mapHeight * tileSize * cellHeight ) );
+    mapBorder.setFillColor( sf::Color::Transparent );
+    mapBorder.setOutlineColor( sf::Color::Green );
+    mapBorder.setOutlineThickness( 19.f );
 
     // Create a lambda function for updating the rectangles
     auto UpdateSelection = [] ( sf::RectangleShape& selection, sf::RectangleShape& selectionCell, sf::Vector3i& position )
@@ -121,6 +127,8 @@ int main()
                 // Snap to grid
                 selectPosition.x -= selectPosition.x % tileSize;
                 selectPosition.y -= selectPosition.y % tileSize;
+
+                std::cout << "now " << selectPosition.x << ", " << selectPosition.y << std::endl;
             }
 
             if( event.type == sf::Event::KeyPressed )
@@ -198,11 +206,11 @@ int main()
                     if( view.getCenter().y - windowHeight / 2 < 0 )
                         view.setCenter( view.getCenter().x, windowHeight / 2 );
 
-                    if( view.getCenter().x + windowWidth / 2 > mapWidth * tileSize )
-                        view.setCenter( mapWidth * tileSize - windowWidth / 2, view.getCenter().y );
+                    if( view.getCenter().x + windowWidth / 2 > mapWidth * cellWidth * tileSize )
+                        view.setCenter( mapWidth * cellWidth * tileSize - windowWidth / 2, view.getCenter().y );
 
-                    if( view.getCenter().y + windowHeight / 2 > mapWidth * tileSize )
-                        view.setCenter( view.getCenter().x, mapWidth * tileSize - windowHeight / 2 );
+                    if( view.getCenter().y + windowHeight / 2 > mapHeight * cellHeight * tileSize )
+                        view.setCenter( view.getCenter().x, mapWidth * cellHeight * tileSize - windowHeight / 2 );
 
                     globalPosition.x = view.getCenter().x;
                     globalPosition.y = view.getCenter().y;
@@ -239,7 +247,7 @@ int main()
             {
                 float zoomFactor = 1.f;
 
-                if( event.mouseWheel.delta == -1 and zoomLevel < 16.f )
+                if( event.mouseWheel.delta == -1 and zoomLevel < 64.f )
                     zoomFactor = 2;
 
                 if( event.mouseWheel.delta == 1 and zoomLevel > 1.f )
@@ -325,6 +333,7 @@ int main()
 
         window.draw( selection );
         window.draw( selectionCell );
+        window.draw( mapBorder );
 
         gui.draw();
 

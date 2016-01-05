@@ -42,7 +42,7 @@ Cell* SQLFunctions::LoadCell( sf::Vector3i position )
     }
 
     // Grab our value
-    sf::Uint32 id = sqlite3_column_int( statement, 0 );
+    sf::Int32 id = sqlite3_column_int( statement, 0 );
 
     sqlite3_finalize( statement );
 
@@ -50,7 +50,7 @@ Cell* SQLFunctions::LoadCell( sf::Vector3i position )
 };
 
 
-SQLFunctions::LoadLayers( sf::Uint32 cell, sf::Int32 z )
+SQLFunctions::LoadLayers( sf::Int32 cell, sf::Int32 z )
 {
     std::vector< std::shared_ptr<Tile> > tiles;
 
@@ -95,7 +95,7 @@ SQLFunctions::LoadLayers( sf::Uint32 cell, sf::Int32 z )
         else
         {
             // Everything is good to go! Make a new tile
-            sf::Uint32 ret[3];
+            sf::Int32 ret[3];
             for( int i = 0; i < 3; i++ )
                 ret[i] = sqlite3_column_int( statement, i );
 
@@ -109,9 +109,9 @@ SQLFunctions::LoadLayers( sf::Uint32 cell, sf::Int32 z )
     return tiles;
 };
 
-std::map< sf::Uint32, sf::Uint32 > SQLFunctions::LoadBiomes( sf::Uint32 id )
+std::map< sf::Int32, sf::Int32 > SQLFunctions::LoadBiomes( sf::Int32 id )
 {
-    std::map< sf::Uint32, sf::Uint32 > biomes;
+    std::map< sf::Int32, sf::Int32 > biomes;
 
     // Make a SQL query
     std::string query = "SELECT Z, Biome FROM CellBiomes WHERE Cell = ?";
@@ -148,11 +148,11 @@ std::map< sf::Uint32, sf::Uint32 > SQLFunctions::LoadBiomes( sf::Uint32 id )
         else
         {
             // Everything is good to go! Make a new biome entry
-            sf::Uint32 ret[2];
+            sf::Int32 ret[2];
             for( int i = 0; i < 2; i++ )
                 ret[i] = sqlite3_column_int( statement, i );
 
-            biomes.insert( std::pair< sf::Uint32, sf::Uint32 > ( ret[0], ret[1] ) );
+            biomes.insert( std::pair< sf::Int32, sf::Int32 > ( ret[0], ret[1] ) );
         }
     }
 
@@ -161,9 +161,9 @@ std::map< sf::Uint32, sf::Uint32 > SQLFunctions::LoadBiomes( sf::Uint32 id )
     return biomes;
 };
 
-sf::Uint32 SQLFunctions::GetMaxCellID()
+sf::Int32 SQLFunctions::GetMaxCellID()
 {
-    sf::Uint32 maxCellID = 0;
+    sf::Int32 maxCellID = 0;
     // Make a SQL query
     sqlite3_stmt *statement;
     std::string query = "SELECT MAX(ID) FROM Cells";

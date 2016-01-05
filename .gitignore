@@ -52,3 +52,6 @@ obj/*
 *.depend
 MapEditor.depend
 *.depend
+MapEditor.depend
+MapEditor.depend
+*.layout
