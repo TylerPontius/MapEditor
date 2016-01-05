@@ -17,22 +17,22 @@ class Cell : public sf::Drawable, public sf::Transformable
     friend class Map;
 
 public:
-    Cell( sf::Uint32 id, sf::Vector3i position );
+    Cell( sf::Int32 id, sf::Vector3i position );
     ~Cell();
 
     void Save();
     void Load();
 
-    void SetTile( sf::Vector3i position, sf::Uint32 tile, sf::Texture* tileset );
-    void SetBiome( sf::Vector3i position, sf::Uint32 tile, sf::Texture* tileset );
-    void SetAir( sf::Vector3i position, sf::Uint32 air );
-    void SetRegion( sf::Vector3i position, sf::Uint32 region );
+    void SetTile( sf::Vector3i position, sf::Int32 tile, sf::Texture* tileset );
+    void SetBiome( sf::Vector3i position, sf::Int32 tile, sf::Texture* tileset );
+    void SetAir( sf::Vector3i position, sf::Int32 air );
+    void SetRegion( sf::Vector3i position, sf::Int32 region );
 
-    sf::Uint32 GetTile  ( sf::Vector3i position );
-    sf::Uint32 GetBiome ( sf::Vector3i position );
-    sf::Uint32 GetRegion( sf::Vector3i position );
+    sf::Int32 GetTile  ( sf::Vector3i position );
+    sf::Int32 GetBiome ( sf::Vector3i position );
+    sf::Int32 GetRegion( sf::Vector3i position );
 
-    sf::Uint32 GetID() { return myID; };
+    sf::Int32 GetID() { return myID; };
     sf::Vector3i GetPosition() { return myPosition; };
 
 private:
@@ -42,7 +42,7 @@ private:
     void AddLayer( sf::Vector3i position, sf::Texture* tileset );
     void RemoveLayer( sf::Vector3i position );
 
-    sf::Uint32 myID;
+    sf::Int32 myID;
     sf::Vector3i myPosition;
 
     // Map of all Z layers

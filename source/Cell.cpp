@@ -2,7 +2,7 @@
 #include "Map.hpp"
 #include <iostream>
 
-Cell::Cell( sf::Uint32 id, sf::Vector3i position ) : myID( id ), myPosition( position )
+Cell::Cell( sf::Int32 id, sf::Vector3i position ) : myID( id ), myPosition( position )
 {
     // Set the tile info
     setOrigin( 0.f, 0.f );
@@ -48,7 +48,7 @@ void Cell::Save()
             SQLite::Statement query( Map::db, "INSERT INTO Cells VALUES( ?, ?, ? )" );
 
             // Bind our request
-            query.bind( 1, (int)myID );
+            query.bind( 1, myID );
             query.bind( 2, myPosition.x );
             query.bind( 3, myPosition.y );
 
@@ -75,21 +75,22 @@ void Cell::Load()
         SQLite::Statement query( Map::db, "SELECT Z, Biome, Air, Region FROM Layers WHERE Cell = ?" );
 
         // Bind our request
-        query.bind( 1, (int)myID );
+        query.bind( 1, myID );
 
         while( query.executeStep() )
         {
             // Everything is good to go! Make a new layer
             sf::Vector3i layerPos = myPosition;
             layerPos.z        = query.getColumn( 0 ).getInt();
-            sf::Uint32 biome  = query.getColumn( 1 ).getInt();
-            sf::Uint32 air    = query.getColumn( 2 ).getInt();
-            sf::Uint32 region = query.getColumn( 3 ).getInt();
+            sf::Int32 biome  = query.getColumn( 1 ).getInt();
+            sf::Int32 air    = query.getColumn( 2 ).getInt();
+            sf::Int32 region = query.getColumn( 3 ).getInt();
 
             AddLayer ( layerPos, Map::tileset );
             SetBiome ( layerPos, biome, Map::tileset );
             SetAir   ( layerPos, air );
             SetRegion( layerPos, region );
+
             myLayers.at( layerPos.z )->Load();
         }
     }
@@ -100,7 +101,7 @@ void Cell::Load()
 };
 
 
-void Cell::SetTile( sf::Vector3i position, sf::Uint32 tile, sf::Texture* tileset )
+void Cell::SetTile( sf::Vector3i position, sf::Int32 tile, sf::Texture* tileset )
 {
     // Make sure we have a layer for the tile
     if( !LayerExists( position ) )
@@ -112,7 +113,7 @@ void Cell::SetTile( sf::Vector3i position, sf::Uint32 tile, sf::Texture* tileset
 };
 
 // Set a Z layer to have a biome
-void Cell::SetBiome( sf::Vector3i position, sf::Uint32 tile, sf::Texture* tileset )
+void Cell::SetBiome( sf::Vector3i position, sf::Int32 tile, sf::Texture* tileset )
 {
     // Make sure we have a layer for the tile
     if( !LayerExists( position ) )
@@ -122,20 +123,20 @@ void Cell::SetBiome( sf::Vector3i position, sf::Uint32 tile, sf::Texture* tilese
     myLayers.at( position.z )->SetBiome( tile );
 };
 
-void Cell::SetAir( sf::Vector3i position, sf::Uint32 air )
+void Cell::SetAir( sf::Vector3i position, sf::Int32 air )
 {
     if( LayerExists( position ) )
         myLayers.at( position.z )->SetAir( air );
 };
 
-void Cell::SetRegion( sf::Vector3i position, sf::Uint32 region )
+void Cell::SetRegion( sf::Vector3i position, sf::Int32 region )
 {
     if( LayerExists( position ) )
         myLayers.at( position.z )->SetRegion( region );
 };
 
 // Return the biome tile ID, or 0 if there is none
-sf::Uint32 Cell::GetTile( sf::Vector3i position )
+sf::Int32 Cell::GetTile( sf::Vector3i position )
 {
     if( LayerExists( position ) )
         return myLayers.at( position.z )->GetTile( position );
@@ -145,7 +146,7 @@ sf::Uint32 Cell::GetTile( sf::Vector3i position )
 };
 
 // Return the biome tile ID, or 0 if there is none
-sf::Uint32 Cell::GetBiome( sf::Vector3i position )
+sf::Int32 Cell::GetBiome( sf::Vector3i position )
 {
     if( LayerExists( position ) )
         return myLayers.at( position.z )->GetBiome();
@@ -155,7 +156,7 @@ sf::Uint32 Cell::GetBiome( sf::Vector3i position )
 };
 
 // Return the biome tile ID, or 0 if there is none
-sf::Uint32 Cell::GetRegion( sf::Vector3i position )
+sf::Int32 Cell::GetRegion( sf::Vector3i position )
 {
     if( LayerExists( position ) )
         return myLayers.at( position.z )->GetRegion();

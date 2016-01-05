@@ -12,7 +12,7 @@ public:
     SQLFunctions();
     ~SQLFunctions();
     Cell* LoadCell( sf::Vector3i position );
-    sf::Uint32 GetMaxCellID();
+    sf::Int32 GetMaxCellID();
 
 private:
     sqlite3 *db;

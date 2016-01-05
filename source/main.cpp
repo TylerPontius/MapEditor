@@ -65,7 +65,7 @@ int main()
     tileSelection.setOutlineColor( sf::Color::Red );
     tileSelection.setOutlineThickness( 2.f );
 
-    sf::Uint32 currentTile = 0;
+    sf::Int32 currentTile = 0;
 
     // Create the view
     sf::View view( sf::Vector2f( windowWidth / 2, windowHeight / 2 ), sf::Vector2f( windowWidth, windowHeight ) );
