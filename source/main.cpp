@@ -105,7 +105,9 @@ int main()
     int fps = 0;
 
     sf::Vector3i previousSelection;
+    sf::Vector2f viewOffset, rightClickHolding;
     std::string region, regionSubtitle;
+
 
     while( window.isOpen() )
     {
@@ -118,17 +120,74 @@ int main()
             // Mouse clicked
             if( event.type == sf::Event::MouseButtonPressed )
             {
-                // Get the current mouse position in world coords
-                sf::Vector2f worldPos( window.mapPixelToCoords( sf::Mouse::getPosition( window ) ) );
+                if( event.mouseButton.button == sf::Mouse::Left )
+                {
+                    // Get the current mouse position in world coords
+                    sf::Vector2f worldPos( window.mapPixelToCoords( sf::Mouse::getPosition( window ) ) );
 
-                selectPosition.x = worldPos.x;
-                selectPosition.y = worldPos.y;
+                    selectPosition.x = worldPos.x;
+                    selectPosition.y = worldPos.y;
 
-                // Snap to grid
-                selectPosition.x -= selectPosition.x % tileSize;
-                selectPosition.y -= selectPosition.y % tileSize;
+                    // Snap to grid
+                    selectPosition.x -= selectPosition.x % tileSize;
+                    selectPosition.y -= selectPosition.y % tileSize;
 
-                std::cout << "now " << selectPosition.x << ", " << selectPosition.y << std::endl;
+                    std::cout << "Selection: " << selectPosition.x << ", " << selectPosition.y << std::endl;
+                }
+
+                if( event.mouseButton.button == sf::Mouse::Right )
+                {
+                    rightClickHolding = sf::Vector2f( event.mouseButton.x, event.mouseButton.y );
+                }
+            }
+
+            // Mouse released
+            if( event.type == sf::Event::MouseButtonReleased )
+            {
+                if( event.mouseButton.button == sf::Mouse::Right )
+                {
+                    rightClickHolding = sf::Vector2f( 0, 0 );
+                }
+            }
+
+            if( event.type == sf::Event::MouseMoved )
+            {
+                // Are we panning the view?
+                if( sf::Mouse::isButtonPressed( sf::Mouse::Button::Right ) and rightClickHolding != sf::Vector2f( 0, 0 ) )
+                {
+                    // Find the change in mouse position
+                    sf::Vector2f deltaMouse = sf::Vector2f( rightClickHolding.x - event.mouseMove.x, rightClickHolding.y - event.mouseMove.y );
+
+                    //std::cout << "PRINT\n";
+                    //std::cout << rightClickHolding.x << " " << rightClickHolding.y << "\n";
+                    //std::cout << event.mouseMove.x << " " << event.mouseMove.y << "\n";
+
+                    float increment = tileSize * zoomLevel;
+                    float mouseSensitivity = tileSize / 4;
+
+                    // If we've moved at least a tile, update the view
+                    if( abs( deltaMouse.x / mouseSensitivity ) >= 1.0  or abs( deltaMouse.y / mouseSensitivity ) >= 1.0 )
+                    {
+                        // We will 'use up' the mouse movement during this calculation, so we need to change
+                        // the pinned/grabbing position to reflect this used movement.
+                        rightClickHolding -= deltaMouse;
+
+                        // Snap to the grid; round up if negative, down if positive
+                        sf::Vector2f deltaTiles;
+                        if( deltaMouse.x > 0 )
+                            deltaTiles.x = floorf( deltaMouse.x / mouseSensitivity );
+                        else
+                            deltaTiles.x = ceilf( deltaMouse.x / mouseSensitivity );
+
+                        if( deltaMouse.y > 0 )
+                            deltaTiles.y = floorf( deltaMouse.y / mouseSensitivity );
+                        else
+                            deltaTiles.y = ceilf( deltaMouse.y / mouseSensitivity );
+
+                        // Set the offset (to be moved later)
+                        viewOffset = deltaTiles * increment;
+                    }
+                }
             }
 
             if( event.type == sf::Event::KeyPressed )
@@ -197,25 +256,7 @@ int main()
                         default: break;
                     }
 
-                    view.move( offset );
-
-                    // Make sure we don't move out of the world
-                    if( view.getCenter().x - windowWidth / 2 < 0 )
-                        view.setCenter( windowWidth / 2, view.getCenter().y );
-
-                    if( view.getCenter().y - windowHeight / 2 < 0 )
-                        view.setCenter( view.getCenter().x, windowHeight / 2 );
-
-                    if( view.getCenter().x + windowWidth / 2 > mapWidth * cellWidth * tileSize )
-                        view.setCenter( mapWidth * cellWidth * tileSize - windowWidth / 2, view.getCenter().y );
-
-                    if( view.getCenter().y + windowHeight / 2 > mapHeight * cellHeight * tileSize )
-                        view.setCenter( view.getCenter().x, mapWidth * cellHeight * tileSize - windowHeight / 2 );
-
-                    globalPosition.x = view.getCenter().x;
-                    globalPosition.y = view.getCenter().y;
-
-                    worldMap.UpdateLoadedCells( globalPosition );
+                    viewOffset = offset;
                 }
 
                 // If a movement button changed state
@@ -247,9 +288,11 @@ int main()
             {
                 float zoomFactor = 1.f;
 
+                // Zoom out
                 if( event.mouseWheel.delta == -1 and zoomLevel < 64.f )
                     zoomFactor = 2;
 
+                // Zoom in
                 if( event.mouseWheel.delta == 1 and zoomLevel > 1.f )
                     zoomFactor = 0.5;
 
@@ -303,6 +346,32 @@ int main()
             // "close requested" event: we close the window
             if( event.type == sf::Event::Closed or ( event.type == sf::Event::KeyPressed and event.key.code == sf::Keyboard::Escape) )
                 window.close();
+        }
+
+        // Update the view
+        if( viewOffset.x != 0 or viewOffset.y != 0 )
+        {
+            view.move( viewOffset );
+
+            // Make sure we don't move out of the world
+            if( view.getCenter().x - windowWidth / 2 < 0 )
+                view.setCenter( windowWidth / 2, view.getCenter().y );
+
+            if( view.getCenter().y - windowHeight / 2 < 0 )
+                view.setCenter( view.getCenter().x, windowHeight / 2 );
+
+            if( view.getCenter().x + windowWidth / 2 > mapWidth * cellWidth * tileSize )
+                view.setCenter( mapWidth * cellWidth * tileSize - windowWidth / 2, view.getCenter().y );
+
+            if( view.getCenter().y + windowHeight / 2 > mapHeight * cellHeight * tileSize )
+                view.setCenter( view.getCenter().x, mapWidth * cellHeight * tileSize - windowHeight / 2 );
+
+            globalPosition.x = view.getCenter().x;
+            globalPosition.y = view.getCenter().y;
+
+            worldMap.UpdateLoadedCells( globalPosition );
+
+            viewOffset = sf::Vector2f( 0, 0 );
         }
 
         // Set the label text
